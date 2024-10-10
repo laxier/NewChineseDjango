@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from mindmaps.models import MindMap, Category, WordInMindMap
+from mindmaps.models import MindMap, WordInMindMap
 from chineseword.models import ChineseWord
 
 
@@ -39,17 +39,10 @@ class MindMapSerializer(serializers.ModelSerializer):
         root_words = WordInMindMap.objects.filter(mind_map=obj, parent__isnull=True)
         return WordInMindMapSerializer(root_words, many=True).data
 
-class CategorySerializer(serializers.ModelSerializer):
-    words = WordInMindMapSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Category
-        fields = ['id', 'name', 'mind_map', 'words']
-
 
 class AddWordSerializer(serializers.Serializer):
     simplified = serializers.CharField(max_length=50)
-    parent = serializers.CharField(max_length=50, required=False)  # Change to CharField for a single character
+    parent = serializers.CharField(max_length=50, required=False)
     children = serializers.ListField(
         child=serializers.CharField(max_length=50),
         required=False

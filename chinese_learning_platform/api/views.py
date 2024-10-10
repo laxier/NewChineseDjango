@@ -1,16 +1,12 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from mindmaps.models import MindMap, Category, ChineseWord, WordInMindMap
-from .serializers import MindMapSerializer, CategorySerializer, ChineseWordSerializer, WordInMindMapSerializer, AddWordSerializer
+from mindmaps.models import MindMap, ChineseWord, WordInMindMap
+from .serializers import MindMapSerializer, ChineseWordSerializer, WordInMindMapSerializer, AddWordSerializer
 from rest_framework.views import APIView
 
 class MindMapViewSet(viewsets.ModelViewSet):
     queryset = MindMap.objects.all()
     serializer_class = MindMapSerializer
-
-class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
 
 class ChineseWordViewSet(viewsets.ModelViewSet):
     queryset = ChineseWord.objects.all()
@@ -27,23 +23,12 @@ class WordInMindMapViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def perform_create(self, serializer):
-        word_in_map = serializer.save()
-        category_ids = self.request.data.get('categories', [])
-        categories = Category.objects.filter(id__in=category_ids, mind_map=word_in_map.mind_map)
-        word_in_map.categories.set(categories)
-
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-
-        category_ids = request.data.get('categories', [])
-        if category_ids:
-            categories = Category.objects.filter(id__in=category_ids, mind_map=instance.mind_map)
-            instance.categories.set(categories)
 
         return Response(serializer.data)
 
@@ -85,14 +70,14 @@ class AddWordToMindMapView(APIView):
             # Handle children associations
             for child_char in child_characters:
                 try:
-                    # Assuming child_char is the simplified character of a ChineseWord
-                    child_word = ChineseWord.objects.get(simplified=child_char)
+                    # Create or get the child ChineseWord
+                    child_word, _ = ChineseWord.objects.get_or_create(simplified=child_char)
                     # Get or create WordInMindMap entry for the child
                     child_word_in_map, _ = WordInMindMap.objects.get_or_create(word=child_word, mind_map=mind_map)
                     child_word_in_map.parent = word_in_mind_map  # Set the parent for the child
                     child_word_in_map.save()
-                except ChineseWord.DoesNotExist:
-                    return Response({"error": f"Child word '{child_char}' not found"}, status=status.HTTP_404_NOT_FOUND)
+                except Exception as e:
+                    return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"message": "Word and children added successfully", "word_id": word_in_mind_map.id}, status=status.HTTP_201_CREATED)
 

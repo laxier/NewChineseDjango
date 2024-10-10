@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import MindMap, Category, WordInMindMap
-from chineseword.models import ChineseWord
+from .models import MindMap, WordInMindMap
 
 class WordInMindMapInline(admin.TabularInline):
     model = WordInMindMap
@@ -14,15 +13,8 @@ class MindMapAdmin(admin.ModelAdmin):
     list_filter = ('created_at', 'updated_at')
     inlines = [WordInMindMapInline]  # Add the inline to MindMapAdmin
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'mind_map')
-    search_fields = ('name',)
-    list_filter = ('mind_map',)
-
 @admin.register(WordInMindMap)
 class WordInMindMapAdmin(admin.ModelAdmin):
     list_display = ('word', 'mind_map', 'parent')
     search_fields = ('word__simplified', 'word__pinyin', 'mind_map__title')
     list_filter = ('mind_map', 'parent')
-    filter_horizontal = ('categories',)

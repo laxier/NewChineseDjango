@@ -1,10 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import MindMapViewSet, CategoryViewSet, ChineseWordViewSet, AddWordToMindMapView
+from .views import MindMapViewSet, ChineseWordViewSet, AddWordToMindMapView
 
 router = DefaultRouter()
 router.register(r'mindmaps', MindMapViewSet)
-router.register(r'categories', CategoryViewSet)
 router.register(r'words', ChineseWordViewSet)
 
 urlpatterns = [
