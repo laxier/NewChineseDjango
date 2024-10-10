@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'mindmaps.apps.MindmapsConfig',
     'api.apps.ApiConfig',
+    'chineseword.apps.ChinesewordConfig'
 ]
 
 MIDDLEWARE = [
