@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from mindmaps.models import MindMap, ChineseWord, WordInMindMap
+from mindmaps.models import MindMap, Category, WordInMindMap
+from chineseword.models import ChineseWord
+
 
 class ChineseWordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,7 +9,6 @@ class ChineseWordSerializer(serializers.ModelSerializer):
         fields = ['id', 'simplified', 'traditional', 'pinyin', 'meaning']
 
 class WordInMindMapSerializer(serializers.ModelSerializer):
-    # Flatten the ChineseWord fields directly
     id = serializers.IntegerField(source='word.id')
     simplified = serializers.CharField(source='word.simplified')
     traditional = serializers.CharField(source='word.traditional')
@@ -20,7 +21,11 @@ class WordInMindMapSerializer(serializers.ModelSerializer):
         fields = ['id', 'simplified', 'traditional', 'pinyin', 'meaning', 'children']
 
     def get_children(self, obj):
-        return WordInMindMapSerializer(obj.children.all(), many=True).data
+        # Only return children if there are any
+        children = WordInMindMap.objects.filter(parent=obj)
+        if children.exists():
+            return WordInMindMapSerializer(children, many=True).data
+        return None  # Return None instead of an empty list
 
 class MindMapSerializer(serializers.ModelSerializer):
     root_words = serializers.SerializerMethodField()
@@ -33,3 +38,10 @@ class MindMapSerializer(serializers.ModelSerializer):
         # Filter to get only root words (words without a parent)
         root_words = WordInMindMap.objects.filter(mind_map=obj, parent__isnull=True)
         return WordInMindMapSerializer(root_words, many=True).data
+
+class CategorySerializer(serializers.ModelSerializer):
+    words = WordInMindMapSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'mind_map', 'words']
