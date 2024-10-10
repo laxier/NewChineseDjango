@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import MindMap, Category, WordInMindMap, ChineseWord
+from .models import MindMap, Category, WordInMindMap
+from chineseword.models import ChineseWord
 
 class WordInMindMapInline(admin.TabularInline):
     model = WordInMindMap

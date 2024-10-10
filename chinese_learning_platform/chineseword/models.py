@@ -4,7 +4,7 @@ from django.db import models
 
 class ChineseWord(models.Model):
     simplified = models.CharField(max_length=50)
-    traditional = models.CharField(max_length=50, blank=True)
+    traditional = models.CharField(max_length=50, blank=True, null=True)
     pinyin = models.CharField(max_length=100, blank=True)
     meaning = models.TextField(blank=True)
 

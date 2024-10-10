@@ -45,3 +45,12 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name', 'mind_map', 'words']
+
+
+class AddWordSerializer(serializers.Serializer):
+    simplified = serializers.CharField(max_length=50)
+    parent = serializers.CharField(max_length=50, required=False)  # Change to CharField for a single character
+    children = serializers.ListField(
+        child=serializers.CharField(max_length=50),
+        required=False
+    )
