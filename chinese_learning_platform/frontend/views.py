@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.db.models import Q, Prefetch
 from .forms import WordSearchForm
 from django.contrib.auth import get_user_model
-from users.models import Deck, WordPerformance
+from users.models import Deck, WordPerformance, UserDeck
 from chineseword.models import ChineseWord
 from .forms import SearchForm
 from django.utils import timezone
@@ -14,8 +14,8 @@ from django.views.generic import ListView
 from django.core.paginator import Paginator
 from django.db.models import F, ExpressionWrapper, FloatField
 
-
 User = get_user_model()
+
 
 class IndexPageView(LoginRequiredMixin, View):
     template_name = 'index.html'
@@ -37,8 +37,13 @@ class IndexPageView(LoginRequiredMixin, View):
         )
 
     def get_recent_decks(self, user):
-        """Fetch the latest 4 decks for the user."""
-        return user.decks.all().order_by('name')[:4]
+        """Fetch the latest 4 decks for the user and return Deck instances with UserDeck data."""
+        user_decks = user.userdeck_set.all()
+        return Deck.objects.prefetch_related(
+            Prefetch('userdeck_set',
+                     queryset=user_decks.filter(user=user),
+                     to_attr='user_deck')
+        ).filter(creator=user).order_by('-userdeck__edited')[:4]
 
     def get_context_data(self, user):
         """Build the context data to pass to the template."""
@@ -51,7 +56,7 @@ class IndexPageView(LoginRequiredMixin, View):
 
 
 class UserDecksView(LoginRequiredMixin, ListView):
-    model = Deck
+    model = UserDeck
     template_name = 'decks.html'
     context_object_name = 'decks'
     paginate_by = 20
@@ -65,14 +70,21 @@ class UserDecksView(LoginRequiredMixin, ListView):
         return get_object_or_404(User, username=self.kwargs['username'])
 
     def get_user_decks(self, user):
-        """Get the decks related to the user and order them by ID."""
-        return Deck.objects.filter(users=user).order_by('-id')
+        """Get the decks related to the user and order them by the UserDeck timestamp."""
+        return Deck.objects.filter(users=user).prefetch_related(
+            Prefetch(
+                'userdeck_set',
+                queryset=UserDeck.objects.filter(user=user).only('id', 'percent', 'deck_id', 'timestamp'),
+                to_attr='user_deck'
+            )
+        ).order_by('-userdeck__timestamp')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user'] = self.user
         context['current_user'] = self.request.user
         return context
+
 
 class WordPaginationMixin:
     """

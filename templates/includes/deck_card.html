@@ -1,8 +1,35 @@
-<div class="card h-100">
+<div class="card">
     <div class="card-body">
         <h5 class="card-title">{{ deck.name }}</h5>
         <h6 class="card-subtitle mb-2 text-muted">by {{ deck.creator.username }}</h6>
-        <p class="card-text"></p>
-        <a href="{% url 'frontend:deck_detail' deck.id %}" class="btn btn-primary">Open Deck</a>
+        <a href="/deck/{{ deck.id }}" class="card-link">Open</a>
+        <a href="/review/{{ deck.id }}" class="card-link">Repeat</a>
+        <a href="/test/{{ deck.id }}" class="card-link">Test</a>
+        {% if current_user.id == deck.creator_id or current_user.username == 'admin' %}
+        <a href="/edit_deck/{{ deck.id }}" class="card-link">Edit</a>
+        {% endif %}
+    </div>
+    <div class="card-footer text-muted">
+        {% with percent=deck.user_deck.0.percent %}
+        <div class="progress-bar-row">
+            <span class="progress-text">{{ deck.user_deck.0.timestamp|date:"F j, Y" }}</span>
+            <span class="progress-text">{{ percent }}%</span>
+        </div>
+
+        {% if percent >= 80 %}
+        {% with progress_color='bg-success' %}
+        {% include 'includes/progress_bar.html' with percent=percent progress_color=progress_color %}
+        {% endwith %}
+        {% elif percent >= 60 %}
+        {% with progress_color='bg-warning' %}
+        {% include 'includes/progress_bar.html' with percent=percent progress_color=progress_color %}
+        {% endwith %}
+        {% else %}
+        {% with progress_color='bg-danger' %}
+        {% include 'includes/progress_bar.html' with percent=percent progress_color=progress_color %}
+        {% endwith %}
+        {% endif %}
+
+        {% endwith %}
     </div>
 </div>
