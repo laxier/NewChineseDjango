@@ -18,6 +18,6 @@
         </ul>
     </li>
     {% else %}
-    <li><a href="/words" class="nav-link px-2 link-dark">Слова</a></li>
+    <li><a href="{% url 'frontend:all-words' %}" class="nav-link px-2 link-dark">Слова</a></li>
     {% endif %}
 </ul>

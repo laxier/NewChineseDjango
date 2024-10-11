@@ -22,19 +22,7 @@
 <div class="container">
     <h1>Недавние слова</h1>
     {% if perform %}
-    <div class="table-container">
-        <div class="table-row heading">
-            <div class="row-item">Слово</div>
-            <div class="row-item">Произношение</div>
-            <div class="row-item">Перевод</div>
-            <div class="row-item">Раунды</div>
-            <div class="row-item">Статистика</div>
-        </div>
-
-        {% for performance in perform %}
-        {% include 'includes/word_table_row.html' with performance=performance %}
-        {% endfor %}
-    </div>
+        {% include 'includes/performance_table.html' with performances=perform %}
     {% else %}
     <p>Пока ничего нет</p>
     {% endif %}

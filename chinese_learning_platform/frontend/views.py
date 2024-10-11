@@ -1,20 +1,20 @@
 from django.views import View
 from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-from django.views.generic import ListView
 from django.db.models import Q, Prefetch
-from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import WordSearchForm
 from django.contrib.auth import get_user_model
 from users.models import Deck, WordPerformance
 from chineseword.models import ChineseWord
 from .forms import SearchForm
 from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Q
+from django.views.generic import DetailView
+from django.shortcuts import get_object_or_404
 from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
+from django.core.paginator import Paginator
+
+
 class IndexPageView(LoginRequiredMixin, View):
     template_name = 'index.html'
 
@@ -24,10 +24,15 @@ class IndexPageView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
     def get_performances(self, user):
-        """Fetch the latest 10 word performances for the user."""
-        return WordPerformance.objects.filter(user=user).prefetch_related(
-            Prefetch('word', queryset=ChineseWord.objects.all())
-        )[:10]
+        """Fetch the latest 5 word performances for the user."""
+        return (
+            WordPerformance.objects.filter(user=user)
+            .prefetch_related(
+                Prefetch('word', queryset=ChineseWord.objects.all())
+            )
+            .order_by('-timestamp')
+            [:5]
+        )
 
     def get_recent_decks(self, user):
         """Fetch the latest 4 decks for the user."""
@@ -42,7 +47,9 @@ class IndexPageView(LoginRequiredMixin, View):
         }
         return context
 
+
 User = get_user_model()
+
 
 class UserDecksView(LoginRequiredMixin, ListView):
     model = Deck
@@ -69,12 +76,12 @@ class UserDecksView(LoginRequiredMixin, ListView):
         return context
 
 
-
 class SearchFilterMixin:
     """
     Mixin to provide search filtering functionality for ListViews.
     This mixin expects the model to have 'simplified', 'traditional', 'pinyin', and 'meaning' fields.
     """
+
     def apply_search_filter(self, queryset):
         """Apply the search filter if a search query is provided."""
         search_query = self.request.GET.get('search')
@@ -88,10 +95,24 @@ class SearchFilterMixin:
         return queryset
 
 
-class AllWordsView(SearchFilterMixin, ListView):
+class WordPaginationMixin:
+    """
+    Mixin to provide pagination functionality for word-related views.
+    This mixin adds pagination capabilities to ListViews.
+    """
+    paginate_by = 20  # Default number of items per page
+
+    def get_paginated_queryset(self, queryset):
+        """Paginate the queryset based on the current page number."""
+        page_number = self.request.GET.get('page', 1)  # Default to the first page
+        paginator = Paginator(queryset, self.paginate_by)
+        page_obj = paginator.get_page(page_number)
+        return page_obj
+
+
+class AllWordsView(SearchFilterMixin, WordPaginationMixin, ListView):
     template_name = 'all_words.html'
     context_object_name = 'words'
-    paginate_by = 50
 
     def get_queryset(self):
         queryset = self.get_base_queryset()
@@ -119,21 +140,20 @@ class AllWordsView(SearchFilterMixin, ListView):
         context['title'] = 'Все слова'
         context['search_form'] = WordSearchForm(self.request.GET)
         context['current_user'] = self.request.user
-        context['extra_url_params'] = self.get_extra_url_params()
+
+        # Add user performance context
+        if self.request.user.is_authenticated:
+            context['performances'] = {word.id: word.user_performance for word in self.object_list}
+        else:
+            context['performances'] = None  # or an empty dictionary if you prefer
+
         return context
 
-    def get_extra_url_params(self):
-        """Generate extra URL parameters for pagination."""
-        if 'search' in self.request.GET:
-            return f"&search={self.request.GET['search']}"
-        return ""
 
-
-class UserWordsView(LoginRequiredMixin, SearchFilterMixin, ListView):
+class UserWordsView(LoginRequiredMixin, SearchFilterMixin, WordPaginationMixin, ListView):
     model = WordPerformance
     template_name = 'mywords.html'
     context_object_name = 'performances'
-    paginate_by = 20
 
     def get_queryset(self):
         performances = WordPerformance.objects.filter(user=self.request.user).select_related('word')
@@ -186,6 +206,33 @@ class UserWordsView(LoginRequiredMixin, SearchFilterMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['search_form'] = SearchForm(self.request.GET)
         context['review_period'] = self.request.GET.get('review_period', '')
-        context['now'] = timezone.now()  # Add current time to the context
+        context['now'] = timezone.now()
+        context['current_user'] = self.request.user
         return context
 
+class DeckDetailView(DetailView):
+    model = Deck
+    template_name = 'deck_detail.html'
+    context_object_name = 'deck'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        deck = self.object
+        current_user = self.request.user
+
+        performance_data = self.get_performance_data(deck, current_user)
+        context['current_user'] = current_user
+        context['deck_data'] = performance_data  # To be used in your JS for charts
+
+        return context
+
+    def get_performance_data(self, deck, user):
+        return {
+            "dates": [],  # Dates for performance data
+            "percentages": [],  # Percentages of correct answers
+            "wrongAnswers": [],  # Array of wrong answers
+            "id": []  # IDs corresponding to performance data
+        }
+
+    def get_queryset(self):
+        return Deck.objects.prefetch_related('words')
