@@ -25,11 +25,11 @@ SECRET_KEY = 'django-insecure-=pgv_mp-c3@v9*nxbns34*fc-c_^vrgmx@xmno@&sq4rulxz2q
 # DEBUG = True
 DEBUG = False
 
-ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'amvera-hahshkj2wkj-run-chinese-on-djang.io']
+ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'chinese-on-djang-hahshkj2wkj.amvera.io']
 CSRF_TRUSTED_ORIGINS = [
     'http://192.168.0.100',
     'http://localhost',
-    'https://amvera-hahshkj2wkj-run-chinese-on-djang.io'
+    'https://chinese-on-djang-hahshkj2wkj.amvera.io'
 ]
 
 # Application definition
@@ -70,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'chinese_learning_platform.urls'
@@ -138,7 +139,6 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
