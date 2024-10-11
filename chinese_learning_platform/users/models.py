@@ -57,7 +57,7 @@ class WordPerformance(models.Model):
         unique_together = (('user', 'word'),)
 
     @property
-    def accuracy_percentage(self):
+    def accuracy_percentage_display(self):
         if self.repetitions > 0:
             return round((self.right / (self.right + self.wrong)) * 100)
         return 0

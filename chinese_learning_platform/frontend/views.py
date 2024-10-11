@@ -188,13 +188,19 @@ class UserWordsView(LoginRequiredMixin, WordPaginationMixin, ListView):
         sort_by = self.request.GET.get('sort_by', 'edited')
         sort_order = self.request.GET.get('sort_order', 'desc')
 
-        if sort_by == 'accuracy_percentage':
-            queryset = queryset.annotate(
-                accuracy_percentage=ExpressionWrapper(
-                    (F('right') * 100.0) / (F('right') + F('wrong')),
-                    output_field=FloatField()
-                )
+        # Annotate the queryset with `accuracy_percentage`
+        queryset = queryset.annotate(
+            accuracy_percentage=ExpressionWrapper(
+                (F('right') * 100.0) / (F('right') + F('wrong')),
+                output_field=FloatField()
             )
+        )
+
+        if sort_by == 'accuracy_percentage':
+            if sort_order == 'asc':
+                return queryset.order_by('accuracy_percentage')
+            else:
+                return queryset.order_by('-accuracy_percentage')
 
         if sort_order == 'asc':
             return queryset.order_by(sort_by)
