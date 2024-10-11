@@ -220,9 +220,14 @@ class DeckDetailView(DetailView):
         deck = self.object
         current_user = self.request.user
 
-        performance_data = self.get_performance_data(deck, current_user)
         context['current_user'] = current_user
-        context['deck_data'] = performance_data  # To be used in your JS for charts
+        words_in_deck = deck.words.all()
+        if current_user.is_authenticated:
+            performances = WordPerformance.objects.filter(word__in=words_in_deck, user=current_user)
+            context['performances'] = performances
+            context['deck_data'] = self.get_performance_data(deck, performances)
+        else:
+            context['words'] = words_in_deck
 
         return context
 
@@ -236,3 +241,19 @@ class DeckDetailView(DetailView):
 
     def get_queryset(self):
         return Deck.objects.prefetch_related('words')
+
+
+from django.views.generic import UpdateView
+from django.shortcuts import get_object_or_404
+from django.views.generic import CreateView
+
+class EditDeckView(UpdateView):
+    pass
+class ReviewDeckView(ListView):
+    pass
+
+class TestDeckView(ListView):
+    pass
+
+class AddDeckView(CreateView):
+    pass

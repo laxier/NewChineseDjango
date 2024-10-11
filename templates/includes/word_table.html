@@ -3,14 +3,9 @@
         <div class="row-item">Слово</div>
         <div class="row-item">Произношение</div>
         <div class="row-item">Перевод</div>
-        <div class="row-item percent-header">Статистика</div>
-        <div class="row-item">Раунды</div>
-        {% if request.path == '/user-words/' or request.path == '/deck/' %}
-            <div class="row-item date-header">Повторение</div>
-        {% endif %}
     </div>
 
     {% for word in words %}
-        {% include "includes/word_table_row.html" %}
+    {% include "includes/word_table_row.html" %}
     {% endfor %}
 </div>

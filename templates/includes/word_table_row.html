@@ -1,19 +1,7 @@
-
 <div class="table-row">
     <div class="row-item">
-        <div class="chinese">{{ word.simplified }}</div>  <!-- Updated to access word -->
+        <div class="chinese">{{ word.simplified }}</div>
     </div>
-    <div class="row-item">{{ word.pinyin }}</div>  <!-- Updated to access word -->
-    <div class="row-item">{{ word.meaning }}</div>  <!-- Updated to access word -->
-    <div class="row-item">{{ word.performance }}</div>
-    <div class="row-item percent">{{ word.performance.accuracy_percentage }}%</div>
-    {% if request.path == '/user-words/' or request.path == '/deck/' %}  <!-- Check if in user-words or deck -->
-    <div class="row-item">
-        {% if word.performance.next_review_date < now %}
-        {{ word.performance.next_review_date|timesince }} ago
-        {% else %}
-        in {{ word.performance.next_review_date|timeuntil }}
-        {% endif %}
-    </div>
-    {% endif %}
+    <div class="row-item">{{ word.pinyin }}</div>
+    <div class="row-item">{{ word.meaning }}</div>
 </div>
