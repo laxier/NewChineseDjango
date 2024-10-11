@@ -9,7 +9,8 @@
             {% endif %}
         </div>
         {% for item in to_test %}
-            <div class="table-row" card-id="{{ item.word.id }}">
+            <div class="table-row">
+                <input type="hidden" class="perf-id" value="{{ item.performance.id }}">
                 <div class="row-item chinese">
                     <div class="simplified">{{ item.word.simplified }}</div>
                 </div>

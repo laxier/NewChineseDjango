@@ -59,9 +59,13 @@ class DeckPerformanceSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return DeckPerformance.objects.create(**validated_data)
 
-    def validate_wrong_answers(self, value):
-        if value == '':
-            return 'None'
-        return value
+from users.models import WordPerformance
 
+class WordPerformanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WordPerformance
+        fields = ['id', 'user', 'word', 'ef_factor', 'repetitions', 'right', 'wrong', 'timestamp', 'edited', 'next_review_date']
+        read_only_fields = ['id', 'user', 'timestamp', 'edited', 'next_review_date']
 
+    def create(self, validated_data):
+        return WordPerformance.objects.create(**validated_data)

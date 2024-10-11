@@ -1,10 +1,11 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from mindmaps.models import MindMap, ChineseWord, WordInMindMap
-from users.models import DeckPerformance, UserDeck
+from users.models import DeckPerformance, UserDeck, WordPerformance
 from .serializers import DeckPerformanceSerializer
 from rest_framework.permissions import IsAuthenticated
-from .serializers import MindMapSerializer, ChineseWordSerializer, WordInMindMapSerializer, AddWordSerializer
+from .serializers import MindMapSerializer, ChineseWordSerializer, WordInMindMapSerializer, AddWordSerializer, \
+    WordPerformanceSerializer
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
@@ -15,7 +16,7 @@ class DeckPerformanceViewSet(viewsets.ModelViewSet):
     queryset = DeckPerformance.objects.all()
     serializer_class = DeckPerformanceSerializer
     authentication_classes = [SessionAuthentication]
-    permission_classes = [IsAuthenticated]  # Enforce authentication
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         print("Received data:", self.request.data)
@@ -27,13 +28,44 @@ class DeckPerformanceViewSet(viewsets.ModelViewSet):
         user_deck.percent = deck_performance.percent_correct
         user_deck.save()
 
+
+class WordPerformanceViewSet(viewsets.ModelViewSet):
+    queryset = WordPerformance.objects.all()
+    serializer_class = WordPerformanceSerializer
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def update_performance(self, request, pk, correct=True):
+        performance = self.get_object()
+        if performance.user != request.user:
+            return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+        if correct:
+            performance.correct()
+        else:
+            performance.incorrect()
+        performance.save()
+        serializer = self.get_serializer(performance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def mark_correct(self, request, pk):
+        return self.update_performance(request, pk, correct=True)
+
+    def mark_incorrect(self, request, pk):
+        return self.update_performance(request, pk, correct=False)
+
+
 class MindMapViewSet(viewsets.ModelViewSet):
     queryset = MindMap.objects.all()
     serializer_class = MindMapSerializer
 
+
 class ChineseWordViewSet(viewsets.ModelViewSet):
     queryset = ChineseWord.objects.all()
     serializer_class = ChineseWordSerializer
+
 
 class WordInMindMapViewSet(viewsets.ModelViewSet):
     queryset = WordInMindMap.objects.all()
@@ -110,7 +142,8 @@ class AddWordToMindMapView(APIView):
         except ChineseWord.DoesNotExist:
             raise Response({"error": f"Parent word '{parent_character}' not found"}, status=status.HTTP_404_NOT_FOUND)
         except WordInMindMap.DoesNotExist:
-            raise Response({"error": f"Parent word '{parent_character}' not found in the MindMap"}, status=status.HTTP_404_NOT_FOUND)
+            raise Response({"error": f"Parent word '{parent_character}' not found in the MindMap"},
+                           status=status.HTTP_404_NOT_FOUND)
 
     def handle_children_associations(self, child_characters, word_in_mind_map, mind_map):
         """Handle associations of child words in the MindMap."""
@@ -122,4 +155,3 @@ class AddWordToMindMapView(APIView):
                 child_word_in_map.save()
             except Exception as e:
                 raise Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-

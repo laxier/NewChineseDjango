@@ -76,10 +76,10 @@ class WordPerformance(models.Model):
         return interval
 
     def correct(self):
-        if self.next_review_date.replace(tzinfo=timezone.utc) >= timezone.now() and self.repetitions != 0:
+        if self.next_review_date >= timezone.now() and self.repetitions != 0:
             return
 
-        if (self.right <= 1 and self.repetitions >= 3) or (self.accuracy_percentage <= 30 and self.repetitions >= 3):
+        if (self.right <= 1 and self.repetitions >= 3) or (self.accuracy_percentage_display <= 30 and self.repetitions >= 3):
             self.repetitions = 1
         else:
             self.repetitions += 1
@@ -91,17 +91,17 @@ class WordPerformance(models.Model):
         self.next_review_date = timezone.now() + timedelta(days=interval)
 
     def incorrect(self):
-        if self.next_review_date.replace(tzinfo=timezone.utc) >= timezone.now() and self.repetitions != 0:
+        if self.next_review_date >= timezone.now() and self.repetitions != 0:
             return
 
         self.repetitions += 1
         self.wrong += 1
         quality = 2
 
-        if self.accuracy_percentage >= 80:
+        if self.accuracy_percentage_display >= 80:
             quality = 1
 
-        if self.repetitions >= 7 and self.accuracy_percentage <= 86:
+        if self.repetitions >= 7 and self.accuracy_percentage_display <= 86:
             self.repetitions = 1
             quality = 1
 

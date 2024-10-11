@@ -1,20 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="container">
-        <h1>{{ title2 }} Тема: <a href="/deck/{{ deck.id }}">{{ deck.name }}</a></h1>
-        
-        {% include "includes/flashcard.html" %}
-        
-        {% include "includes/card_table.html" %}
-    </div>
+<input type="hidden" id="user-id" value="{{ current_user.id }}">
+<div class="container">
+    <h1>{{ title2 }} Тема: <a href="/deck/{{ deck.id }}">{{ deck.name }}</a></h1>
+
+    {% include "includes/flashcard.html" %}
+
+    {% include "includes/card_table.html" %}
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
     window.addEventListener("load", function () {
         const Rows = document.querySelectorAll('.table-row:not(.heading)');
-        console.log(Rows);
         const progress_bar = document.getElementById("quiz-progress");
         progress_bar.ariaValueMax = Rows.length;
         const increment = 100 / Rows.length;
@@ -25,7 +42,6 @@
 
         displayFlashcard(currentFlashcardIndex);
 
-        // Toggle flashcard display
         document.getElementById("flashcard").addEventListener("click", function (event) {
             if (event.target.tagName === 'BUTTON') {
                 return; // Prevent toggle if button is clicked
@@ -45,9 +61,11 @@
             var back = document.querySelector('#flashcard .back');
             front.style.display = "flex";
             back.style.display = "none";
-            document.getElementById("front-character").textContent = Rows[index].querySelector('.simplified').textContent;
-            document.getElementById("back-pronunciation").textContent = Rows[index].querySelector('.pinyin').textContent;
-            document.getElementById("back-translation").textContent = Rows[index].querySelector('.meaning').textContent;
+            const currentRow = Rows[index];
+
+            document.getElementById("front-character").textContent = currentRow.querySelector('.simplified').textContent;
+            document.getElementById("back-pronunciation").textContent = currentRow.querySelector('.pinyin').textContent;
+            document.getElementById("back-translation").textContent = currentRow.querySelector('.meaning').textContent;
         }
 
         function getNextFlashcard() {
@@ -62,18 +80,17 @@
         }
 
         function endQuiz() {
-            if (isQuizEnding) return; // Prevent executing if already ending the quiz
+            if (isQuizEnding) return;
             isQuizEnding = true;
 
-            // Animate progress bar to 100%
             progress = 100; // Set progress to 100
-            progress_bar.style.width = `${progress}%`; // Update the progress bar
+            progress_bar.style.width = `${progress}%`;
 
-            // Set a delay to show the alert after the animation
-            setTimeout(function() {
+
+            setTimeout(function () {
                 alert("Больше нет слов, перезапускаю\n" + `${Math.round(countRight / Rows.length * 100)}%`);
                 restartQuiz();
-            }, 500); // 500ms delay (adjust as needed)
+            }, 500);
         }
 
         const restart = document.getElementById("quiz-restart");
@@ -94,6 +111,7 @@
         function markCorrect() {
             Rows[currentFlashcardIndex].classList.add("green");
             countRight++;
+            sendResultToAPI(true);
             getNextFlashcard();
         }
 
@@ -102,7 +120,40 @@
 
         function markIncorrect() {
             Rows[currentFlashcardIndex].classList.add("red");
+            sendResultToAPI(false);
             getNextFlashcard();
+        }
+
+        function sendResultToAPI(isCorrect) {
+            const userId = document.getElementById("user-id").value;
+            const wordPerformanceId = Rows[currentFlashcardIndex].querySelector('input[type="hidden"]').value;
+
+            const url = isCorrect
+                ? `${window.location.origin}/api/v1/word-performance/${wordPerformanceId}/correct/`
+                : `${window.location.origin}/api/v1/word-performance/${wordPerformanceId}/incorrect/`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify({
+                    user: userId,
+                }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
         }
     });
 </script>

@@ -12,7 +12,7 @@
     <div class="card-footer text-muted">
         {% with percent=deck.user_deck.0.percent %}
         <div class="progress-bar-row">
-            <span class="progress-text">{{ deck.user_deck.0.timestamp|date:"F j, Y" }}</span>
+            <span class="progress-text">{{ deck.user_deck.0.edited|date:"F j, Y" }}</span>
             <span class="progress-text">{{ percent }}%</span>
         </div>
 
