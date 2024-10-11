@@ -8,5 +8,5 @@ build:
 run:
   persistenceMount: /data
   containerPort: "80"
-  command: sudo gunicorn --workers 3 --bind 0.0.0.0:80 chinese_learning_platform.chinese_learning_platform.wsgi:application
+  command:   cd chinese_learning_platform && gunicorn chinese_learning_platform.wsgi:application --bind 0.0.0.0:80
 
