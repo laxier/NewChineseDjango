@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <h1>{{ title2 }} Тема: <a href="/deck/{{ deck.id }}">{{ deck.name }}</a></h1>
+        
+        {% include "includes/flashcard.html" %}
+        
+        {% include "includes/card_table.html" %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.addEventListener("load", function () {
+        const Rows = document.querySelectorAll('.table-row:not(.heading)');
+        console.log(Rows);
+        const progress_bar = document.getElementById("quiz-progress");
+        progress_bar.ariaValueMax = Rows.length;
+        const increment = 100 / Rows.length;
+        let progress = 0;
+        let currentFlashcardIndex = 0;
+        let countRight = 0;
+        let isQuizEnding = false;
+
+        displayFlashcard(currentFlashcardIndex);
+
+        // Toggle flashcard display
+        document.getElementById("flashcard").addEventListener("click", function (event) {
+            if (event.target.tagName === 'BUTTON') {
+                return; // Prevent toggle if button is clicked
+            }
+            toggleFlashcard();
+        });
+
+        function toggleFlashcard() {
+            var front = document.querySelector('#flashcard .front');
+            var back = document.querySelector('#flashcard .back');
+            front.style.display = (front.style.display === "none") ? "flex" : "none";
+            back.style.display = (back.style.display === "none") ? "flex" : "none";
+        }
+
+        function displayFlashcard(index) {
+            var front = document.querySelector('#flashcard .front');
+            var back = document.querySelector('#flashcard .back');
+            front.style.display = "flex";
+            back.style.display = "none";
+            document.getElementById("front-character").textContent = Rows[index].querySelector('.simplified').textContent;
+            document.getElementById("back-pronunciation").textContent = Rows[index].querySelector('.pinyin').textContent;
+            document.getElementById("back-translation").textContent = Rows[index].querySelector('.meaning').textContent;
+        }
+
+        function getNextFlashcard() {
+            if (currentFlashcardIndex < Rows.length - 1) {
+                currentFlashcardIndex++;
+                progress += increment;
+                progress_bar.style.width = `${progress}%`;
+                displayFlashcard(currentFlashcardIndex);
+            } else {
+                endQuiz(); // End the quiz when all flashcards have been displayed
+            }
+        }
+
+        function endQuiz() {
+            if (isQuizEnding) return; // Prevent executing if already ending the quiz
+            isQuizEnding = true;
+
+            // Animate progress bar to 100%
+            progress = 100; // Set progress to 100
+            progress_bar.style.width = `${progress}%`; // Update the progress bar
+
+            // Set a delay to show the alert after the animation
+            setTimeout(function() {
+                alert("Больше нет слов, перезапускаю\n" + `${Math.round(countRight / Rows.length * 100)}%`);
+                restartQuiz();
+            }, 500); // 500ms delay (adjust as needed)
+        }
+
+        const restart = document.getElementById("quiz-restart");
+        restart.addEventListener('click', restartQuiz);
+
+        function restartQuiz() {
+            currentFlashcardIndex = 0;
+            progress = 0;
+            countRight = 0;
+            isQuizEnding = false; // Reset the quiz ending flag
+            progress_bar.style.width = `${progress}%`;
+            displayFlashcard(currentFlashcardIndex);
+        }
+
+        const correct = document.getElementById("quiz-right");
+        correct.addEventListener('click', markCorrect);
+
+        function markCorrect() {
+            Rows[currentFlashcardIndex].classList.add("green");
+            countRight++;
+            getNextFlashcard();
+        }
+
+        const incorrect = document.getElementById("quiz-wrong");
+        incorrect.addEventListener('click', markIncorrect);
+
+        function markIncorrect() {
+            Rows[currentFlashcardIndex].classList.add("red");
+            getNextFlashcard();
+        }
+    });
+</script>
+{% endblock %}

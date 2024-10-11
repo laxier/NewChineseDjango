@@ -1,8 +1,31 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from mindmaps.models import MindMap, ChineseWord, WordInMindMap
+from users.models import DeckPerformance, UserDeck
+from .serializers import DeckPerformanceSerializer
+from rest_framework.permissions import IsAuthenticated
 from .serializers import MindMapSerializer, ChineseWordSerializer, WordInMindMapSerializer, AddWordSerializer
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.authentication import TokenAuthentication
+
+
+class DeckPerformanceViewSet(viewsets.ModelViewSet):
+    queryset = DeckPerformance.objects.all()
+    serializer_class = DeckPerformanceSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]  # Enforce authentication
+
+    def perform_create(self, serializer):
+        print("Received data:", self.request.data)
+        deck = serializer.validated_data.get('deck')
+        if not UserDeck.objects.filter(user=self.request.user, deck=deck).exists():
+            raise PermissionDenied("You can only create performance records for your own decks.")
+        deck_performance = serializer.save(user=self.request.user)
+        user_deck = get_object_or_404(UserDeck, user=self.request.user, deck=deck_performance.deck)
+        user_deck.percent = deck_performance.percent_correct
+        user_deck.save()
 
 class MindMapViewSet(viewsets.ModelViewSet):
     queryset = MindMap.objects.all()

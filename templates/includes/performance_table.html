@@ -5,7 +5,7 @@
         <div class="row-item">Перевод</div>
         <div class="row-item">Статистика</div>
         <div class="row-item percent-header">Процент</div>
-        {% if request.path == '/user-words/' or request.path == '/deck/' %}
+        {% if '/deck/' in request.path or '/user-words/' in request.path %}
         <div class="row-item date-header">Повторение</div>
         {% endif %}
     </div>

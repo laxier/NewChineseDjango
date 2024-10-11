@@ -48,4 +48,15 @@ class AddWordSerializer(serializers.Serializer):
         required=False
     )
 
+from users.models import DeckPerformance
+
+class DeckPerformanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeckPerformance
+        fields = ['id', 'user', 'deck', 'percent_correct', 'test_date', 'wrong_answers']
+        read_only_fields = ['id', 'user', 'test_date']
+
+    def create(self, validated_data):
+        return DeckPerformance.objects.create(**validated_data)
+
 

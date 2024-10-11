@@ -1,0 +1,26 @@
+<div class="container">
+    <div class="table-container">
+        <div class="table-row heading">
+            <div class="row-item">Слово</div>
+            <div class="row-item">Произношение</div>
+            <div class="row-item">Перевод</div>
+            {% if current_user.is_authenticated %}
+                <div class="row-item">Текущий процент</div>
+            {% endif %}
+        </div>
+        {% for item in to_test %}
+            <div class="table-row" card-id="{{ item.word.id }}">
+                <div class="row-item chinese">
+                    <div class="simplified">{{ item.word.simplified }}</div>
+                </div>
+                <div class="row-item pinyin">{{ item.word.pinyin }}</div>
+                <div class="row-item meaning">{{ item.word.meaning }}</div>
+                {% if current_user.is_authenticated %}
+                    <div class="row-item percent">
+                        {{ item.performance.accuracy_percentage_display }}%
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>

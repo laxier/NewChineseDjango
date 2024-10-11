@@ -147,14 +147,103 @@ class EditDeckView(CurrentUserMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('frontend:edit_deck', kwargs={'pk': self.object.pk})
 
-class ReviewDeckView(ListView):
+
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.db.models import Prefetch
+
+
+class DeckMixin:
+    """Mixin to retrieve a deck based on the URL parameter."""
+
+    def get_deck(self):
+        deck_id = self.kwargs.get('pk')
+        return get_object_or_404(Deck, id=deck_id)
+
+
+class ReviewDeckMixin(DeckMixin):
+    """Mixin to filter words that are due for review."""
+
+    def get_deck(self):
+        # Retrieve the deck using the URL parameter 'pk'
+        deck_id = self.kwargs.get('pk')
+        return get_object_or_404(Deck, id=deck_id)
+
+    def filter_due_words(self, deck):
+        # Prefetch related performance data for the words in the deck
+        words_with_performance = deck.words.prefetch_related('performance')
+
+        due_words = []
+
+        for word in words_with_performance:
+            performance = word.performance.filter(user=self.request.user).first()
+            if self.is_due_for_review(word):  # Only include if due for review
+                due_words.append({
+                    'word': word,
+                    'performance': performance  # Will be None if no performance exists
+                })
+
+        return due_words
+
+    def is_due_for_review(self, word):
+        performance = word.performance.filter(user=self.request.user).first()
+        if performance and performance.next_review_date:
+            return performance.next_review_date <= timezone.now()
+        return False
+
+
+class ReviewDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
     model = Deck
     template_name = 'review_deck.html'
+    context_object_name = 'deck'
+
+    def get_queryset(self):
+        # Prefetch related objects to optimize queries
+        return Deck.objects.prefetch_related(
+            Prefetch('words', queryset=ChineseWord.objects.prefetch_related('wordperformance_set'))
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        deck = self.get_deck()
+        context['to_test'] = self.filter_due_words(deck)
+        context['deck'] = deck
+        return context
 
 
-class TestDeckView(ListView):
+class TestDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
     model = Deck
     template_name = 'test_deck.html'
+
+    def get_queryset(self):
+        # Retrieve the deck object
+        deck = self.get_deck()
+
+        # Return all words in the deck, no filtering
+        return deck.words.prefetch_related('performance')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        deck = self.get_deck()
+        context['deck'] = deck
+
+        # Use the mixin method to get the words due for review
+        context['to_test'] = self.filter_due_words(deck)  # Retrieve only due words for review
+
+        return context
+
+    def filter_due_words(self, deck):
+        """Filter words in the deck that are due for review."""
+        due_words = []
+
+        for word in deck.words.prefetch_related('performance'):
+            performance = word.performance.filter(user=self.request.user).first()
+            due_words.append({
+                'word': word,
+                'performance': performance
+            })
+
+        return due_words
 
 
 class AddDeckView(CreateView):
