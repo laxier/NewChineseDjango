@@ -1,0 +1,80 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let myChart;
+
+    window.addEventListener("load", function () {
+        const body = document.body;
+        const gridColor = (body.classList.contains('dark-theme')) ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        const rawDates = {{ deck_data.test_dates | safe }};
+
+        const currentYear = new Date().getFullYear();  // Get the current year
+        const formattedDates = rawDates.map(date => {
+            const dateObj = new Date(date);
+            const options = { day: 'numeric', month: 'long' };  // Format options for day and month
+            let formattedDate = dateObj.toLocaleDateString('en-US', options);  // Format date
+
+            // Include the year if it's not the current year
+            if (dateObj.getFullYear() !== currentYear) {
+                formattedDate += ` ${dateObj.getFullYear()}`;  // Append year
+            }
+            return formattedDate;
+        });
+        const chartData = {
+            labels: formattedDates,  // Dates for x-axis
+            datasets: [{
+                label: 'Процент правильных ответов',  // Label for the dataset
+                data: {{ deck_data.percent_correct | safe }},  // Percentages for y-axis
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        // Checking if Chart.js and data are properly set up
+        if (!chartData.labels.length || !chartData.datasets[0].data.length) {
+            console.error('No data available for chart');
+            return;
+        }
+    const maxYValue = Math.max(100, ...{{ deck_data.percent_correct | safe }}) + 10;
+        const ctx = document.getElementById('myChart').getContext('2d');
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                minBarLength: 5,
+                maxBarThickness: 30,
+                scales: {
+                    x: {
+                    grid: {color: gridColor}},
+                    y: {
+                    grid: {color: gridColor},
+                        beginAtZero: true,
+                        max: maxYValue}
+            }
+        }});
+
+        // Ensure the chart is visible
+        document.getElementById('chart-container').style.display = 'block';
+
+        // Handle chart clicks to show detailed info
+        myChart.canvas.addEventListener('click', function (event) {
+            const activePoints = myChart.getElementsAtEventForMode(event, 'index', {intersect: true}, true);
+            if (activePoints.length > 0) {
+                const index = activePoints[0].index;
+                const date = chartData.labels[index];
+                const percentage = chartData.datasets[0].data[index];
+                const wrongAnswers = {{ deck_data.wrong_answers | safe }}[index];
+
+                const infoContainer = document.getElementById('info-container');
+                infoContainer.innerHTML = `Дата: ${date}, Процент: ${percentage}%, Неправильные ответы: ${wrongAnswers}`;
+            }
+        });
+    });
+</script>
+
+<div class="container">
+    <div id="chart-container" style="display:none;">
+        <canvas id="myChart"></canvas>
+    </div>
+    <div id="info-container"></div>
+</div>

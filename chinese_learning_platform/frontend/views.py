@@ -7,7 +7,6 @@ from users.models import Deck, WordPerformance
 from chineseword.models import ChineseWord
 from .forms import SearchForm
 from django.utils import timezone
-from django.views.generic import DetailView
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -209,51 +208,3 @@ class UserWordsView(LoginRequiredMixin, SearchFilterMixin, WordPaginationMixin, 
         context['now'] = timezone.now()
         context['current_user'] = self.request.user
         return context
-
-class DeckDetailView(DetailView):
-    model = Deck
-    template_name = 'deck_detail.html'
-    context_object_name = 'deck'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        deck = self.object
-        current_user = self.request.user
-
-        context['current_user'] = current_user
-        words_in_deck = deck.words.all()
-        if current_user.is_authenticated:
-            performances = WordPerformance.objects.filter(word__in=words_in_deck, user=current_user)
-            context['performances'] = performances
-            context['deck_data'] = self.get_performance_data(deck, performances)
-        else:
-            context['words'] = words_in_deck
-
-        return context
-
-    def get_performance_data(self, deck, user):
-        return {
-            "dates": [],  # Dates for performance data
-            "percentages": [],  # Percentages of correct answers
-            "wrongAnswers": [],  # Array of wrong answers
-            "id": []  # IDs corresponding to performance data
-        }
-
-    def get_queryset(self):
-        return Deck.objects.prefetch_related('words')
-
-
-from django.views.generic import UpdateView
-from django.shortcuts import get_object_or_404
-from django.views.generic import CreateView
-
-class EditDeckView(UpdateView):
-    pass
-class ReviewDeckView(ListView):
-    pass
-
-class TestDeckView(ListView):
-    pass
-
-class AddDeckView(CreateView):
-    pass
