@@ -7,23 +7,22 @@
         const gridColor = (body.classList.contains('dark-theme')) ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
         const rawDates = {{ deck_data.test_dates | safe }};
 
-        const currentYear = new Date().getFullYear();  // Get the current year
+        const currentYear = new Date().getFullYear();
         const formattedDates = rawDates.map(date => {
             const dateObj = new Date(date);
-            const options = { day: 'numeric', month: 'long' };  // Format options for day and month
-            let formattedDate = dateObj.toLocaleDateString('en-US', options);  // Format date
+            const options = { day: 'numeric', month: 'long' };
+            let formattedDate = dateObj.toLocaleDateString('en-US', options);
 
-            // Include the year if it's not the current year
             if (dateObj.getFullYear() !== currentYear) {
-                formattedDate += ` ${dateObj.getFullYear()}`;  // Append year
+                formattedDate += ` ${dateObj.getFullYear()}`;
             }
             return formattedDate;
         });
         const chartData = {
-            labels: formattedDates,  // Dates for x-axis
+            labels: formattedDates,
             datasets: [{
-                label: 'Процент правильных ответов',  // Label for the dataset
-                data: {{ deck_data.percent_correct | safe }},  // Percentages for y-axis
+                label: 'Процент правильных ответов',
+                data: {{ deck_data.percent_correct | safe }},
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1

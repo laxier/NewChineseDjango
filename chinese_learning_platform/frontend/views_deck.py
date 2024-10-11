@@ -1,9 +1,20 @@
 from django.views.generic import UpdateView, CreateView, ListView, DetailView
-from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from users.models import Deck, WordPerformance, DeckPerformance
+from users.models import Deck, WordPerformance, DeckPerformance, DeckWord
+from chineseword.models import ChineseWord
+from .forms_deck import WordForm
+from django.contrib import messages
+import re
 
-class DeckDetailView(DetailView):
+
+class CurrentUserMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_user'] = self.request.user
+        return context
+
+
+class DeckDetailView(CurrentUserMixin, DetailView):
     model = Deck
     template_name = 'deck_detail.html'
     context_object_name = 'deck'
@@ -12,8 +23,6 @@ class DeckDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         deck = self.object
         current_user = self.request.user
-
-        context['current_user'] = current_user
         words_in_deck = deck.words.all()
         if current_user.is_authenticated:
             performances = WordPerformance.objects.filter(word__in=words_in_deck, user=current_user)
@@ -42,24 +51,114 @@ class DeckDetailView(DetailView):
     def get_queryset(self):
         return Deck.objects.prefetch_related('words')
 
-class EditDeckView(UpdateView):
+
+class EditDeckView(CurrentUserMixin, UpdateView):
     model = Deck
     template_name = 'edit_deck.html'
-    success_url = reverse_lazy('frontend:deck_detail')  
+    form_class = WordForm
 
-    def get_object(self, queryset=None):
-        return get_object_or_404(Deck, pk=self.kwargs['pk'])
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_words'] = self.object.words.all()  # Fetch current words
+        context['word_form'] = self.get_form()  # Include the form in context
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+
+        if form.is_valid():
+            # Process deleted words and added words
+            deleted_word_list = self.process_deleted_words(request)
+            added_word_list, skipped_words_list = self.process_new_words(form.cleaned_data['new_words'])
+
+            # Send messages to the user
+            self.handle_messages(request, deleted_word_list, added_word_list, skipped_words_list)
+
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def process_deleted_words(self, request):
+        """
+        Handle deletion of words from the deck.
+        Returns a list of deleted word names.
+        """
+        delete_words = request.POST.getlist('delete_word')
+        deleted_word_list = []
+        if delete_words:
+            words_to_delete = ChineseWord.objects.filter(id__in=delete_words)
+            deleted_word_list = [word.simplified for word in words_to_delete]  # Capture word names before deletion
+            DeckWord.objects.filter(word__in=words_to_delete, deck=self.object).delete()
+        return deleted_word_list
+
+    def process_new_words(self, new_words):
+        """
+        Handle adding new words to the deck.
+        Returns two lists: added words and skipped words (already in the deck).
+        """
+        added_word_list = []
+        skipped_words_list = []
+
+        if new_words:
+            word_list = re.split(r'[,\uFF0C]', new_words)  # Split by both ',' and '，'
+            for simplified in word_list:
+                simplified = simplified.strip()
+                if simplified:
+                    word, created = ChineseWord.objects.get_or_create(simplified=simplified)
+
+                    # Check if the word is already in the deck
+                    if not DeckWord.objects.filter(deck=self.object, word=word).exists():
+                        DeckWord.objects.create(deck=self.object, word=word)
+                        added_word_list.append(simplified)
+                    else:
+                        skipped_words_list.append(simplified)
+                    self.ensure_word_performance(word)
+
+        return added_word_list, skipped_words_list
+
+    def ensure_word_performance(self, word):
+        """
+        Ensure that a word is added to the user's WordPerformance if it doesn't exist.
+        """
+        WordPerformance.objects.get_or_create(
+            user=self.request.user,
+            word=word,
+            defaults={'ef_factor': 2, 'repetitions': 0, 'right': 0, 'wrong': 0}
+        )
+
+    def handle_messages(self, request, deleted_word_list, added_word_list, skipped_words_list):
+        """
+        Send messages to the user based on actions (added, deleted, skipped words).
+        """
+        if deleted_word_list:
+            messages.success(request, f"Deleted words: {'; '.join(deleted_word_list)}.")
+        if added_word_list:
+            messages.success(request, f"New words successfully added: {'; '.join(added_word_list)}.")
+        if skipped_words_list:
+            messages.info(request, f"These words were already in the deck: {'; '.join(skipped_words_list)}.")
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_success_url(self):
+        return reverse_lazy('frontend:edit_deck', kwargs={'pk': self.object.pk})
 
 class ReviewDeckView(ListView):
-    model = Deck  
-    template_name = 'review_deck.html'  
+    model = Deck
+    template_name = 'review_deck.html'
+
 
 class TestDeckView(ListView):
     model = Deck
-    template_name = 'test_deck.html'  
+    template_name = 'test_deck.html'
+
 
 class AddDeckView(CreateView):
     model = Deck
-    template_name = 'add_deck.html'  
-    fields = ['name']  
-    success_url = reverse_lazy('frontend:deck_detail')  
+    template_name = 'add_deck.html'
+    fields = ['name']
+    success_url = reverse_lazy('frontend:deck_detail')

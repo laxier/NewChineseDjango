@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>
+    Edit Deck:
+    <a href="{% url 'frontend:deck_detail' deck.pk %}">{{ deck.name }}</a>
+</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    <h2>Current Words</h2>
+
+    <div class="table-container">
+        <div class="table-row heading">
+            <div class="row-item">Слово</div>
+            <div class="row-item">Произношение</div>
+            <div class="row-item">Перевод</div>
+            <div class="row-item">Удалить</div>
+        </div>
+
+        {% for word in current_words %}
+            <div class="table-row">
+                <div class="row-item">{{ word.simplified }}</div>
+                <div class="row-item">{{ word.pinyin }}</div>
+                <div class="row-item">{{ word.meaning }}</div>
+                <div class="row-item">
+                    <input type="checkbox" name="delete_word" value="{{ word.id }}">
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Add New Words</h2>
+    <label>Simplified:</label>
+    {{ word_form.new_words }}  <!-- Render the field for adding new words -->
+    <small>Enter words separated by commas (optional).</small>
+    <button type="submit">Save Changes</button>
+</form>
+{% endblock %}

@@ -12,7 +12,10 @@ from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 from django.core.paginator import Paginator
+from django.db.models import F, ExpressionWrapper, FloatField
 
+
+User = get_user_model()
 
 class IndexPageView(LoginRequiredMixin, View):
     template_name = 'index.html'
@@ -47,9 +50,6 @@ class IndexPageView(LoginRequiredMixin, View):
         return context
 
 
-User = get_user_model()
-
-
 class UserDecksView(LoginRequiredMixin, ListView):
     model = Deck
     template_name = 'decks.html'
@@ -74,26 +74,6 @@ class UserDecksView(LoginRequiredMixin, ListView):
         context['current_user'] = self.request.user
         return context
 
-
-class SearchFilterMixin:
-    """
-    Mixin to provide search filtering functionality for ListViews.
-    This mixin expects the model to have 'simplified', 'traditional', 'pinyin', and 'meaning' fields.
-    """
-
-    def apply_search_filter(self, queryset):
-        """Apply the search filter if a search query is provided."""
-        search_query = self.request.GET.get('search')
-        if search_query:
-            queryset = queryset.filter(
-                Q(simplified__icontains=search_query) |
-                Q(traditional__icontains=search_query) |
-                Q(pinyin__icontains=search_query) |
-                Q(meaning__icontains=search_query)
-            )
-        return queryset
-
-
 class WordPaginationMixin:
     """
     Mixin to provide pagination functionality for word-related views.
@@ -109,7 +89,7 @@ class WordPaginationMixin:
         return page_obj
 
 
-class AllWordsView(SearchFilterMixin, WordPaginationMixin, ListView):
+class AllWordsView(WordPaginationMixin, ListView):
     template_name = 'all_words.html'
     context_object_name = 'words'
 
@@ -148,8 +128,20 @@ class AllWordsView(SearchFilterMixin, WordPaginationMixin, ListView):
 
         return context
 
+    def apply_search_filter(self, queryset):
+        """Apply the search filter if a search query is provided."""
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(simplified__icontains=search_query) |
+                Q(traditional__icontains=search_query) |
+                Q(pinyin__icontains=search_query) |
+                Q(meaning__icontains=search_query)
+            )
+        return queryset
 
-class UserWordsView(LoginRequiredMixin, SearchFilterMixin, WordPaginationMixin, ListView):
+
+class UserWordsView(LoginRequiredMixin, WordPaginationMixin, ListView):
     model = WordPerformance
     template_name = 'mywords.html'
     context_object_name = 'performances'
@@ -196,6 +188,14 @@ class UserWordsView(LoginRequiredMixin, SearchFilterMixin, WordPaginationMixin, 
         sort_by = self.request.GET.get('sort_by', 'edited')
         sort_order = self.request.GET.get('sort_order', 'desc')
 
+        if sort_by == 'accuracy_percentage':
+            queryset = queryset.annotate(
+                accuracy_percentage=ExpressionWrapper(
+                    (F('right') * 100.0) / (F('right') + F('wrong')),
+                    output_field=FloatField()
+                )
+            )
+
         if sort_order == 'asc':
             return queryset.order_by(sort_by)
         return queryset.order_by(f'-{sort_by}')
@@ -208,3 +208,15 @@ class UserWordsView(LoginRequiredMixin, SearchFilterMixin, WordPaginationMixin, 
         context['now'] = timezone.now()
         context['current_user'] = self.request.user
         return context
+
+    def apply_search_filter(self, queryset):
+        """Apply the search filter if a search query is provided."""
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(word__simplified__icontains=search_query) |
+                Q(word__traditional__icontains=search_query) |
+                Q(word__pinyin__icontains=search_query) |
+                Q(word__meaning__icontains=search_query)
+            )
+        return queryset
