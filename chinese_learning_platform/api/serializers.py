@@ -47,3 +47,5 @@ class AddWordSerializer(serializers.Serializer):
         child=serializers.CharField(max_length=50),
         required=False
     )
+
+

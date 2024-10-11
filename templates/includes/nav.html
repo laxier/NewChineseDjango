@@ -1,0 +1,23 @@
+{% load static %}
+<ul class="nav col-12 col-md-auto justify-content-center mb-md-0">
+    <li><a href="{% url 'frontend:index' %}" class="nav-link px-2">Дом</a></li>
+    {% if current_user.is_authenticated %}
+    <li>
+        <a href="{% url 'frontend:user_decks' user.username %}" class="nav-link px-2">Профиль</a>
+    </li>
+
+    <li class="nav-item dropdown">
+        <a class="nav-link px-2 dropdown-toggle" href="#" id="navbarDropdown" role="button"
+           data-bs-toggle="dropdown"
+           aria-expanded="false">
+            Слова
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="{% url 'frontend:user-words'%}">Мои Слова</a></li>
+            <li><a class="dropdown-item" href="{% url 'frontend:all-words' %}">Слова</a></li>
+        </ul>
+    </li>
+    {% else %}
+    <li><a href="/words" class="nav-link px-2 link-dark">Слова</a></li>
+    {% endif %}
+</ul>

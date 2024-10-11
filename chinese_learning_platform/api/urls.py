@@ -9,4 +9,6 @@ router.register(r'words', ChineseWordViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('mindmaps/<int:mindmap_id>/add-word/', AddWordToMindMapView.as_view(), name='add-word-to-mindmap'),
+
+
 ]

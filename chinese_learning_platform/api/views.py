@@ -34,6 +34,7 @@ class WordInMindMapViewSet(viewsets.ModelViewSet):
 
 
 class AddWordToMindMapView(APIView):
+
     def post(self, request, mindmap_id):
         serializer = AddWordSerializer(data=request.data)
         if serializer.is_valid():
@@ -41,44 +42,61 @@ class AddWordToMindMapView(APIView):
             parent_character = serializer.validated_data.get('parent')  # Expecting a single parent character
             child_characters = serializer.validated_data.get('children', [])  # Accepting a list of child characters
 
-            # Create or get the ChineseWord
-            chinese_word, created = ChineseWord.objects.get_or_create(simplified=simplified)
+            chinese_word = self.get_or_create_chinese_word(simplified)
+            mind_map = self.get_mind_map_or_404(mindmap_id)
 
-            # Get the MindMap
-            try:
-                mind_map = MindMap.objects.get(id=mindmap_id)
-            except MindMap.DoesNotExist:
-                return Response({"error": "MindMap not found"}, status=status.HTTP_404_NOT_FOUND)
+            word_in_mind_map = self.get_or_create_word_in_map(chinese_word, mind_map)
 
-            # Check if WordInMindMap already exists
-            word_in_mind_map, created = WordInMindMap.objects.get_or_create(word=chinese_word, mind_map=mind_map)
-
-            # Handle parent associations
             if parent_character:
-                try:
-                    # Assuming parent_character is the simplified character of a ChineseWord
-                    parent_word = ChineseWord.objects.get(simplified=parent_character)
-                    # Get the parent WordInMindMap entry based on the parent ChineseWord
-                    parent_word_in_map = WordInMindMap.objects.get(word=parent_word, mind_map=mind_map)
-                    word_in_mind_map.parent = parent_word_in_map  # Associate with the WordInMindMap entry
-                    word_in_mind_map.save()
-                except ChineseWord.DoesNotExist:
-                    return Response({"error": f"Parent word '{parent_character}' not found"}, status=status.HTTP_404_NOT_FOUND)
-                except WordInMindMap.DoesNotExist:
-                    return Response({"error": f"Parent word '{parent_character}' not found in the MindMap"}, status=status.HTTP_404_NOT_FOUND)
+                parent_word_in_map = self.handle_parent_association(parent_character, mind_map)
+                word_in_mind_map.parent = parent_word_in_map
+                word_in_mind_map.save()
 
-            # Handle children associations
-            for child_char in child_characters:
-                try:
-                    # Create or get the child ChineseWord
-                    child_word, _ = ChineseWord.objects.get_or_create(simplified=child_char)
-                    # Get or create WordInMindMap entry for the child
-                    child_word_in_map, _ = WordInMindMap.objects.get_or_create(word=child_word, mind_map=mind_map)
-                    child_word_in_map.parent = word_in_mind_map  # Set the parent for the child
-                    child_word_in_map.save()
-                except Exception as e:
-                    return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            self.handle_children_associations(child_characters, word_in_mind_map, mind_map)
 
-            return Response({"message": "Word and children added successfully", "word_id": word_in_mind_map.id}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": "Word and children added successfully", "word_id": word_in_mind_map.id},
+                status=status.HTTP_201_CREATED
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_or_create_chinese_word(self, simplified):
+        """Create or get a ChineseWord by its simplified form."""
+        chinese_word, _ = ChineseWord.objects.get_or_create(simplified=simplified)
+        return chinese_word
+
+    def get_mind_map_or_404(self, mindmap_id):
+        """Get a MindMap by its ID or return 404 response."""
+        try:
+            return MindMap.objects.get(id=mindmap_id)
+        except MindMap.DoesNotExist:
+            raise Response({"error": "MindMap not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def get_or_create_word_in_map(self, chinese_word, mind_map):
+        """Create or get a WordInMindMap entry."""
+        word_in_mind_map, _ = WordInMindMap.objects.get_or_create(word=chinese_word, mind_map=mind_map)
+        return word_in_mind_map
+
+    def handle_parent_association(self, parent_character, mind_map):
+        """Handle association with a parent word in the MindMap."""
+        try:
+            parent_word = ChineseWord.objects.get(simplified=parent_character)
+            parent_word_in_map = WordInMindMap.objects.get(word=parent_word, mind_map=mind_map)
+            return parent_word_in_map
+        except ChineseWord.DoesNotExist:
+            raise Response({"error": f"Parent word '{parent_character}' not found"}, status=status.HTTP_404_NOT_FOUND)
+        except WordInMindMap.DoesNotExist:
+            raise Response({"error": f"Parent word '{parent_character}' not found in the MindMap"}, status=status.HTTP_404_NOT_FOUND)
+
+    def handle_children_associations(self, child_characters, word_in_mind_map, mind_map):
+        """Handle associations of child words in the MindMap."""
+        for child_char in child_characters:
+            try:
+                child_word = self.get_or_create_chinese_word(child_char)
+                child_word_in_map = self.get_or_create_word_in_map(child_word, mind_map)
+                child_word_in_map.parent = word_in_mind_map  # Set the parent for the child
+                child_word_in_map.save()
+            except Exception as e:
+                raise Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+

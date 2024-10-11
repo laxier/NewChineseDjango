@@ -4,4 +4,4 @@ from .models import ChineseWord
 class ChineseWordAdmin(admin.ModelAdmin):
     list_display = ('simplified', 'traditional', 'pinyin', 'meaning')
     search_fields = ('simplified', 'traditional', 'pinyin', 'meaning')
-    list_filter = ('simplified',)
+    list_filter = ('hsk_level',)

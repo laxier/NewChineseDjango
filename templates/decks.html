@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Decks{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ user.username }}'s Decks</h1>
+    {% if decks %}
+        {% for deck in decks %}
+            {% if forloop.counter0|divisibleby:4 %}
+                {% if not forloop.first %}</div>{% endif %}
+                <div class="cards">
+            {% endif %}
+            {% include 'includes/deck_card.html' with deck=deck %}
+            {% if forloop.last %}</div>{% endif %}
+        {% endfor %}
+    {% else %}
+        <p>No decks yet.</p>
+    {% endif %}
+
+    <!-- Include Pagination -->
+    {% include 'includes/pagination.html' with page_obj=page_obj %}
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ title }}</h1>
+    
+    <form method="GET" action="{% url 'frontend:all-words' %}">
+        <div class="input-group mb-3">
+            {{ search_form.search }}
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="submit">Поиск</button>
+            </div>
+        </div>
+    </form>
+
+    {% if words %}
+    <div class="table-container">
+        <div class="table-row heading">
+            <div class="row-item">Слово</div>
+            <div class="row-item">Произношение</div>
+            <div class="row-item">Перевод</div>
+            {% if current_user.is_authenticated %}
+                <div class="row-item">Раунды</div>
+                <div class="row-item">Статистика</div>
+            {% endif %}
+        </div>
+
+        {% for word in words %}
+            <div class="table-row">
+                <div class="row-item">{{ word.simplified }}</div>
+                <div class="row-item">{{ word.pinyin }}</div>
+                <div class="row-item">{{ word.meaning }}</div>
+                {% if current_user.is_authenticated %}
+                    {% with performance=word.user_performance.0 %}
+                        {% if performance %}
+                            <div class="row-item">{{ performance }}</div>
+                            <div class="row-item percent">{{ performance.accuracy_percentage }}%</div>
+                        {% else %}
+                            <div class="row-item">-</div>
+                            <div class="row-item">-</div>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>Слова не найдены</p>
+    {% endif %}
+</div>
+
+{% include 'includes/pagination.html' %}
+{% endblock %}

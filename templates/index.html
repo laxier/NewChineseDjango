@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1>Hi, {{ current_user.username }}!</h1>
+    <h1>Недавние модули</h1>
+
+    {% if recent_decks %}
+    <div class="row">
+        {% for deck in recent_decks %}
+        <div class="col-md-3 mb-4">  <!-- 4 columns -->
+            {% include 'includes/deck_card.html' with deck=deck %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>Пока ничего нет</p>
+    {% endif %}
+</div>
+
+<div class="container">
+    <h1>Недавние слова</h1>
+    {% if perform %}
+    <div class="table-container">
+        <div class="table-row heading">
+            <div class="row-item">Слово</div>
+            <div class="row-item">Произношение</div>
+            <div class="row-item">Перевод</div>
+            <div class="row-item">Раунды</div>
+            <div class="row-item">Статистика</div>
+        </div>
+
+        {% for performance in perform %}
+        {% include 'includes/word_table_row.html' with performance=performance %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>Пока ничего нет</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

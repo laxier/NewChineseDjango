@@ -1,14 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 from django.db import models
-from django.core.validators import MaxValueValidator
 
 class ChineseWord(models.Model):
     simplified = models.CharField(max_length=50, unique=True)
     traditional = models.CharField(max_length=50, blank=True, null=True)
     pinyin = models.CharField(max_length=100, blank=True, null=True)
     meaning = models.TextField(blank=True, null=True)
-    hsk_level = models.PositiveIntegerField(null=True, blank=True, validators=[MaxValueValidator(100)])
+    hsk_level = models.CharField(null=True, blank=True, max_length=10)
 
     def __str__(self):
         return f"{self.simplified} ({self.pinyin})"
