@@ -1,0 +1,11 @@
+meta:
+  environment: python
+  toolchain:
+    name: pip
+    version: "3.8"
+build:
+  requirementsPath: requirements.txt
+run:
+  persistenceMount: /data
+  containerPort: "80"
+  command: python chinese_learning/platform/manage.py runserver
