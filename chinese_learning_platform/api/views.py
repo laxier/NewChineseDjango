@@ -8,13 +8,13 @@ from .serializers import MindMapSerializer, ChineseWordSerializer, WordInMindMap
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import SessionAuthentication
 
 
 class DeckPerformanceViewSet(viewsets.ModelViewSet):
     queryset = DeckPerformance.objects.all()
     serializer_class = DeckPerformanceSerializer
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]  # Enforce authentication
 
     def perform_create(self, serializer):

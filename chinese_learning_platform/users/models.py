@@ -117,7 +117,7 @@ class DeckPerformance(models.Model):
     deck = models.ForeignKey(Deck, on_delete=models.CASCADE)
     percent_correct = models.IntegerField()
     test_date = models.DateTimeField(default=timezone.now)
-    wrong_answers = models.TextField()
+    wrong_answers = models.TextField(blank=True, default='None')
 
     def __str__(self):
         return f'Deck Performance: User {self.user.id}, Deck {self.deck.id}, Percent Correct {self.percent_correct}, Test Date {self.test_date}'

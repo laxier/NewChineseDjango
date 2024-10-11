@@ -59,4 +59,9 @@ class DeckPerformanceSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return DeckPerformance.objects.create(**validated_data)
 
+    def validate_wrong_answers(self, value):
+        if value == '':
+            return 'None'
+        return value
+
 

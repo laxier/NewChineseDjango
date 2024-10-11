@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% csrf_token %}
 <input type="hidden" id="user-id" value="{{ current_user.id }}">
 <input type="hidden" id="deck-id" value="{{ deck.id }}">
 
@@ -15,6 +16,23 @@
 
 {% block scripts %}
 <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
     window.addEventListener("load", function () {
         const Rows = document.querySelectorAll('.table-row:not(.heading)');
         const progress_bar = document.getElementById("quiz-progress");
@@ -116,18 +134,17 @@
                 user: userId,
                 deck: deckId,
                 percent_correct: Math.round(countRight / Rows.length * 100),
-                wrong_answers: wrongAnswers,
+                wrong_answers: wrongAnswers.join(', '),
             };
-
-            const token = localStorage.getItem('token');
 
             fetch('/api/v1/deck-performance/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Token ${token}`,  // Include token in the headers
+                    'X-CSRFToken': csrftoken
                 },
                 body: JSON.stringify(results),
+                credentials: 'include'
             })
                 .then(response => response.json())
                 .then(data => {
