@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from datetime import timedelta
 from django.utils import timezone
-
 from chineseword.models import ChineseWord
 
 User = get_user_model()
@@ -25,6 +24,9 @@ class UserDeck(models.Model):
 
     class Meta:
         unique_together = (('user', 'deck'),)
+        indexes = [
+            models.Index(fields=['user', 'deck']),
+        ]
 
     def __str__(self):
         return f'{self.user.username} - {self.deck.name} ({self.percent}%)'
@@ -36,6 +38,9 @@ class DeckWord(models.Model):
 
     class Meta:
         unique_together = (('deck', 'word'),)
+        indexes = [
+            models.Index(fields=['deck', 'word']),
+        ]
 
     def __str__(self):
         return f'{self.word} in {self.deck} added on {self.added_at}'
@@ -55,6 +60,9 @@ class WordPerformance(models.Model):
 
     class Meta:
         unique_together = (('user', 'word'),)
+        indexes = [
+            models.Index(fields=['user', 'word']),
+        ]
 
     @property
     def accuracy_percentage_display(self):
