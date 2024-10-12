@@ -170,7 +170,9 @@ class WordFilteringMixin:
             queryset = queryset.filter(next_review_date__gte=now - timedelta(days=3), next_review_date__lte=now)
         elif review_period == 'last_day':
             queryset = queryset.filter(next_review_date__gte=now - timedelta(days=1), next_review_date__lte=now)
-        elif review_period in ['', 'zero']:
+        elif review_period == '':
+            queryset = queryset
+        elif review_period == 'zero':
             queryset = queryset.filter(next_review_date__gte=now)
         elif review_period == 'three_days':
             queryset = queryset.filter(next_review_date__lte=now + timedelta(days=3), next_review_date__gte=now)
