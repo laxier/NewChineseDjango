@@ -23,7 +23,7 @@ Chinese Learning Platform is a web application for learning the Chinese language
 ## Technologies
 
 - **Django** - the main framework
-- **Django REST Framework** - for the API (if implemented)
+- **Django REST Framework** - for the API
 - **JavaScript** - for client-side interactivity
 - **HTML/CSS** - for frontend markup
 
