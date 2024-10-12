@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 from django.core.paginator import Paginator
 from django.db.models import F, ExpressionWrapper, FloatField
+from django.core.cache import cache
 
 User = get_user_model()
 

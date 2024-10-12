@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from datetime import timedelta
 from django.utils import timezone
 from chineseword.models import ChineseWord
+from django.utils.functional import cached_property
 
 User = get_user_model()
 
@@ -64,7 +65,7 @@ class WordPerformance(models.Model):
             models.Index(fields=['user', 'word']),
         ]
 
-    @property
+    @cached_property
     def accuracy_percentage_display(self):
         if self.repetitions > 0:
             return round((self.right / (self.right + self.wrong)) * 100)
