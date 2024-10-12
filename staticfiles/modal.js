@@ -16,6 +16,10 @@ function showModal(chineseElement) {
     const modalPinyinElement = document.getElementById("modalPinyin");
     const modalMeaningElement = document.getElementById("modalMeaning");
 
+    const pk = chineseElement.getAttribute('data-id');
+    const detailLink = document.getElementById('modalDetailLink');
+    detailLink.href = `/word/${pk}/`
+
     // Set Pinyin and Meaning in the modal
     if (modalPinyinElement && modalMeaningElement) {
         modalPinyinElement.textContent = pinyin;
