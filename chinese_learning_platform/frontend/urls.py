@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import IndexPageView, UserDecksView, AllWordsView, UserWordsView, ReviewWordsView
 from .views_deck import DeckDetailView, EditDeckView, ReviewDeckView, TestDeckView, AddDeckView
 
@@ -16,4 +16,6 @@ urlpatterns = [
     path('deck/review/<int:pk>/', ReviewDeckView.as_view(), name='review_deck'),
     path('deck/test/<int:pk>/', TestDeckView.as_view(), name='test_deck'),
     path('deck/add/<int:pk>/', AddDeckView.as_view(), name='add_deck'),
+
+    path('word/', include('wordpages.urls'))
 ]
