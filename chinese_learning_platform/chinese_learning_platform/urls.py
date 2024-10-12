@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('api.urls')),
     path('', include('frontend.urls')),
+    path('word/', include('wordpages.urls')),
 ]
 
 if settings.DEBUG:  # Ensure to import settings if not already done
