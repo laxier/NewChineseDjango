@@ -16,11 +16,7 @@ from django.db.models import F, ExpressionWrapper, FloatField
 
 User = get_user_model()
 
-class CurrentUserMixin:
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['current_user'] = self.request.user
-        return context
+
 class IndexPageView(LoginRequiredMixin, View):
     template_name = 'index.html'
 
@@ -59,7 +55,7 @@ class IndexPageView(LoginRequiredMixin, View):
         return context
 
 
-class UserDecksView(CurrentUserMixin, LoginRequiredMixin, ListView):
+class UserDecksView(LoginRequiredMixin, ListView):
     model = UserDeck
     template_name = 'decks.html'
     context_object_name = 'decks'
@@ -86,6 +82,7 @@ class UserDecksView(CurrentUserMixin, LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user'] = self.user
+        context['current_user'] = self.request.user
         return context
 
 
@@ -104,7 +101,7 @@ class WordPaginationMixin:
         return page_obj
 
 
-class AllWordsView(WordPaginationMixin, CurrentUserMixin, ListView):
+class AllWordsView(WordPaginationMixin, ListView):
     template_name = 'all_words.html'
     context_object_name = 'words'
 
@@ -133,7 +130,9 @@ class AllWordsView(WordPaginationMixin, CurrentUserMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Все слова'
         context['search_form'] = WordSearchForm(self.request.GET)
+        context['current_user'] = self.request.user
 
+        # Add user performance context
         if self.request.user.is_authenticated:
             context['performances'] = {word.id: word.user_performance for word in self.object_list}
         else:
@@ -153,7 +152,22 @@ class AllWordsView(WordPaginationMixin, CurrentUserMixin, ListView):
             )
         return queryset
 
-class WordFilteringMixin:
+
+class UserWordsView(LoginRequiredMixin, WordPaginationMixin, ListView):
+    model = WordPerformance
+    template_name = 'mywords.html'
+    context_object_name = 'performances'
+
+    def get_queryset(self):
+        performances = WordPerformance.objects.filter(user=self.request.user).select_related('word')
+
+        performances = self.apply_search_filter(performances)
+        performances = self.apply_review_period_filter(performances)
+        performances = self.apply_hsk_level_filter(performances)
+        performances = self.apply_sorting(performances)
+
+        return performances
+
     def apply_review_period_filter(self, queryset):
         """Applies filtering based on the selected review period."""
         review_period = self.request.GET.get('review_period', '')
@@ -185,6 +199,7 @@ class WordFilteringMixin:
         """Applies sorting based on query parameters."""
         sort_by = self.request.GET.get('sort_by', 'edited')
         sort_order = self.request.GET.get('sort_order', 'desc')
+
         # Annotate the queryset with `accuracy_percentage`
         queryset = queryset.annotate(
             accuracy_percentage=ExpressionWrapper(
@@ -194,9 +209,23 @@ class WordFilteringMixin:
         )
 
         if sort_by == 'accuracy_percentage':
-            return queryset.order_by(sort_order == 'asc' and 'accuracy_percentage' or '-accuracy_percentage')
+            if sort_order == 'asc':
+                return queryset.order_by('accuracy_percentage')
+            else:
+                return queryset.order_by('-accuracy_percentage')
 
-        return queryset.order_by(sort_order == 'asc' and sort_by or f'-{sort_by}')
+        if sort_order == 'asc':
+            return queryset.order_by(sort_by)
+        return queryset.order_by(f'-{sort_by}')
+
+    def get_context_data(self, **kwargs):
+        """Add additional context to the template."""
+        context = super().get_context_data(**kwargs)
+        context['search_form'] = SearchForm(self.request.GET)
+        context['review_period'] = self.request.GET.get('review_period', '')
+        context['now'] = timezone.now()
+        context['current_user'] = self.request.user
+        return context
 
     def apply_search_filter(self, queryset):
         """Apply the search filter if a search query is provided."""
@@ -209,93 +238,3 @@ class WordFilteringMixin:
                 Q(word__meaning__icontains=search_query)
             )
         return queryset
-
-class UserWordsView(LoginRequiredMixin, CurrentUserMixin, WordFilteringMixin, WordPaginationMixin, ListView):
-    model = WordPerformance
-    template_name = 'mywords.html'
-    context_object_name = 'performances'
-
-    def get_queryset(self):
-        performances = WordPerformance.objects.filter(user=self.request.user).select_related('word')
-
-        performances = self.apply_search_filter(performances)
-        performances = self.apply_review_period_filter(performances)
-        performances = self.apply_hsk_level_filter(performances)
-        performances = self.apply_sorting(performances)
-        return performances
-
-    def get_context_data(self, **kwargs):
-        """Add additional context to the template."""
-        context = super().get_context_data(**kwargs)
-        context['search_form'] = SearchForm(self.request.GET)
-        context['review_period'] = self.request.GET.get('review_period', '')
-        context['now'] = timezone.now()
-        total_performances_count = self.get_queryset().count()
-        context['total_performances_count'] = total_performances_count
-        return context
-
-class ReviewWordsView(CurrentUserMixin, WordFilteringMixin, ListView):
-    model = WordPerformance
-    template_name = 'review_words.html'
-    context_object_name = 'performances'
-
-    def get_queryset(self):
-        # Start with the queryset for the logged-in user
-        queryset = WordPerformance.objects.filter(user=self.request.user).select_related('word')
-
-        # Apply filters
-        queryset = self.apply_search_filter(queryset)
-        queryset = self.apply_review_period_filter(queryset)
-        queryset = self.apply_hsk_level_filter(queryset)
-        queryset = self.apply_sorting(queryset)
-        return queryset  # No filtering here, as it will be done in context
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['now'] = timezone.now()
-        review_period = self.request.GET.get('review_period', '')
-        hsk_levels = self.request.GET.getlist('hsk_levels')
-
-        context['period'], context['hsk_levels'] = translate_to_russian(review_period, hsk_levels)
-        context['to_test'] = self.filter_due_words(self.get_queryset())
-        return context
-
-    def filter_due_words(self, queryset):
-        """Filter words that are due for review based on next_review_date."""
-        now = timezone.now()
-        # Filter the queryset directly
-        due_words = queryset.filter(next_review_date__lte=now)
-
-        # Returning a list of dictionaries containing word and performance
-        return [
-            {
-                'word': performance.word,  # Use the related `word`
-                'performance': performance
-            }
-            for performance in due_words
-        ]
-
-def translate_to_russian(review_period=None, hsk_levels=None):
-    """Transform review period and HSK levels to Russian verbose names."""
-    review_period_mapping = {
-        'last_week': 'Последняя неделя',
-        'last_three_days': 'Последние три дня',
-        'last_day': 'Последний день',
-        'zero': 'Нет повторений',
-        'three_days': 'Три дня',
-        'week': 'Неделя',
-    }
-
-    hsk_level_mapping = {
-        '1': 'HSK 1',
-        '2': 'HSK 2',
-        '3': 'HSK 3',
-        '4': 'HSK 4',
-        '5': 'HSK 5',
-        '6': 'HSK 6',
-    }
-
-    translated_period = review_period_mapping.get(review_period, review_period)
-    translated_levels = [hsk_level_mapping.get(level, level) for level in hsk_levels] if hsk_levels else []
-
-    return translated_period, translated_levels

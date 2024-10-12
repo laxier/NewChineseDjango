@@ -4,9 +4,6 @@ from users.models import Deck, WordPerformance, DeckPerformance, DeckWord
 from chineseword.models import ChineseWord
 from .forms_deck import WordForm
 from django.contrib import messages
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.db.models import Prefetch
 import re
 
 
@@ -27,7 +24,6 @@ class DeckDetailView(CurrentUserMixin, DetailView):
         deck = self.object
         current_user = self.request.user
         words_in_deck = deck.words.all()
-        context['now'] = timezone.now()
         if current_user.is_authenticated:
             performances = WordPerformance.objects.filter(word__in=words_in_deck, user=current_user)
             context['performances'] = performances
@@ -152,6 +148,11 @@ class EditDeckView(CurrentUserMixin, UpdateView):
         return reverse_lazy('frontend:edit_deck', kwargs={'pk': self.object.pk})
 
 
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.db.models import Prefetch
+
+
 class DeckMixin:
     """Mixin to retrieve a deck based on the URL parameter."""
 
@@ -207,7 +208,6 @@ class ReviewDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
         deck = self.get_deck()
         context['to_test'] = self.filter_due_words(deck)
         context['deck'] = deck
-        context['now'] = timezone.now()
         return context
 
 
@@ -229,7 +229,6 @@ class TestDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
 
         # Use the mixin method to get the words due for review
         context['to_test'] = self.filter_due_words(deck)  # Retrieve only due words for review
-        context['now'] = timezone.now()
 
         return context
 

@@ -20,7 +20,7 @@ class DeckAdmin(admin.ModelAdmin):
 @admin.register(WordPerformance)
 class WordPerformanceAdmin(admin.ModelAdmin):
     list_display = ('user', 'word', 'right', 'wrong', 'timestamp', 'next_review_date')
-    search_fields = ('user__username', 'word__simplified')
+    search_fields = ('user__username', 'word__character')
     list_filter = ('user',)
 
 @admin.register(DeckPerformance)

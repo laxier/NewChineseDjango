@@ -3,7 +3,7 @@
 {% block content %}
 <input type="hidden" id="user-id" value="{{ current_user.id }}">
 <div class="container">
-    <h1>Тема: <a href="/deck/{{ deck.id }}">{{ deck.name }}</a></h1>
+    <h1>{{ title2 }} Тема: <a href="/deck/{{ deck.id }}">{{ deck.name }}</a></h1>
 
     {% include "includes/flashcard.html" %}
 
