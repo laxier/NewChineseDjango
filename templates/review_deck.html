@@ -4,10 +4,14 @@
 <input type="hidden" id="user-id" value="{{ current_user.id }}">
 <div class="container">
     <h1>Тема: <a href="/deck/{{ deck.id }}">{{ deck.name }}</a></h1>
-
+    {% if to_test %}
     {% include "includes/flashcard.html" %}
 
     {% include "includes/card_table.html" %}
+    {% else %}
+    <h2>Нет слов для тестирования</h2>
+    <p>Пока у вас нет слов, которые нужно повторить.</p>
+    {% endif %}
 </div>
 {% endblock %}
 
