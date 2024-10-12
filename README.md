@@ -36,3 +36,5 @@ In upcoming versions, I plan to introduce the following features:
 - **Modal Windows**: When clicking on a character, users will see modal windows displaying the stroke order for writing, helping them learn proper character formation.
 
 - **Word Pages**: Dedicated pages for each word will be created, providing examples and translations to deepen comprehension.
+
+Previously, the project was implemented using Flask, but due to the desire to add new features, it was decided to transition to Django.
