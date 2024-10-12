@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.authentication import SessionAuthentication
+from django.core.exceptions import MultipleObjectsReturned
 
 
 class DeckPerformanceViewSet(viewsets.ModelViewSet):
@@ -23,7 +24,10 @@ class DeckPerformanceViewSet(viewsets.ModelViewSet):
         deck = serializer.validated_data.get('deck')
         if not UserDeck.objects.filter(user=self.request.user, deck=deck).exists():
             raise PermissionDenied("You can only create performance records for your own decks.")
+
+        # Save the deck performance; wrong_answers are handled in the serializer
         deck_performance = serializer.save(user=self.request.user)
+
         user_deck = get_object_or_404(UserDeck, user=self.request.user, deck=deck_performance.deck)
         user_deck.percent = deck_performance.percent_correct
         user_deck.save()

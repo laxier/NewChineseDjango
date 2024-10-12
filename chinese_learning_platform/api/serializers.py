@@ -48,19 +48,31 @@ class AddWordSerializer(serializers.Serializer):
         required=False
     )
 
+from rest_framework import serializers
 from users.models import DeckPerformance
+from chineseword.models import ChineseWord  # Make sure to import your models
+
 
 class DeckPerformanceSerializer(serializers.ModelSerializer):
+    wrong_answers = serializers.PrimaryKeyRelatedField(queryset=ChineseWord.objects.all(), many=True)
+
     class Meta:
         model = DeckPerformance
-        fields = ['id', 'user', 'deck', 'percent_correct', 'test_date', 'wrong_answers']
-        read_only_fields = ['id', 'user', 'test_date']
+        fields = ['id', 'deck', 'percent_correct', 'wrong_answers']  # Include other fields as needed
 
     def create(self, validated_data):
-        return DeckPerformance.objects.create(**validated_data)
+        wrong_answers_data = validated_data.pop('wrong_answers')
+        deck_performance = DeckPerformance.objects.create(**validated_data)
+
+        # Create the many-to-many relationship
+        deck_performance.wrong_answers.set(wrong_answers_data)  # Set the wrong answers directly
+
+        return deck_performance
+
+
+
 
 from users.models import WordPerformance
-
 class WordPerformanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = WordPerformance

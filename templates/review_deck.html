@@ -126,7 +126,7 @@
 
         function sendResultToAPI(isCorrect) {
             const userId = document.getElementById("user-id").value;
-            const wordPerformanceId = Rows[currentFlashcardIndex].querySelector('input[type="hidden"]').value;
+            const wordPerformanceId = Rows[currentFlashcardIndex].querySelector('.perf-id').value;
 
             const url = isCorrect
                 ? `${window.location.origin}/api/v1/word-performance/${wordPerformanceId}/correct/`

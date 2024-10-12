@@ -125,16 +125,18 @@
 
         function markIncorrect() {
             Rows[currentFlashcardIndex].classList.add("red");
-            wrongAnswers.push(Rows[currentFlashcardIndex].querySelector('.simplified').textContent); // Add the wrong answer
+            const wrongAnswerId = Rows[currentFlashcardIndex].querySelector('.card-id').value;
+            wrongAnswers.push(wrongAnswerId);
             getNextFlashcard();
         }
 
         function sendResults() {
+            console.log(wrongAnswers)
             const results = {
                 user: userId,
                 deck: deckId,
                 percent_correct: Math.round(countRight / Rows.length * 100),
-                wrong_answers: wrongAnswers.join(', '),
+                wrong_answers: wrongAnswers,
             };
 
             fetch('/api/v1/deck-performance/', {
