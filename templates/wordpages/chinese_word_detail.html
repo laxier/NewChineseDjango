@@ -1,10 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block content %}
 <h1>{{ chinese_word.simplified }}</h1>
 <p>Pinyin: {{ chinese_word.pinyin }}</p>
 <p>Meaning: {{ chinese_word.meaning }}</p>
-<p>HSK{{ chinese_word.hsk_level }}</p>
+<p>HSK: {{ chinese_word.hsk_level }}</p>
+
+<h2>Stroke Order</h2>
+<div id="stroke-order-container"></div> <!-- Container for stroke order -->
+
 <h2>Sentences</h2>
 <ul>
     {% for sentence in sentences %}
@@ -13,6 +18,7 @@
     <li>No sentences available.</li>
     {% endfor %}
 </ul>
+
 {% if related_words %}
 <h2>Related Words</h2>
 <ul>
@@ -22,5 +28,94 @@
     <li>No related words available.</li>
     {% endfor %}
 </ul>
-{%endif%}
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer/dist/hanzi-writer.min.js"></script>
+<script>
+    function renderFanningStrokes(target, strokes) {
+        // Check for dark mode preference
+        const isDarkMode = localStorage.getItem('theme') === 'dark';
+        const strokeColor = isDarkMode ? '#ffffff' : '#333333';
+        const gridColor = isDarkMode ? '#333333':'#d6dbe1';
+
+        // Create the main SVG element
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.style.width = '75px';
+        svg.style.height = '75px';
+        svg.style.border = '1px solid #EEE';
+        svg.style.marginRight = '3px';
+        target.appendChild(svg);
+
+        // Create grid background
+        var gridBackground = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        gridBackground.setAttribute('width', '75'); // Match size with main SVG
+        gridBackground.setAttribute('height', '75'); // Match size with main SVG
+
+        // Define the lines for the grid centered within the 75x75 area
+        const lines = [
+            {x1: 0, y1: 0, x2: 75, y2: 75},
+            {x1: 75, y1: 0, x2: 0, y2: 75},
+            {x1: 37.5, y1: 0, x2: 37.5, y2: 75},
+            {x1: 0, y1: 37.5, x2: 75, y2: 37.5}
+        ];
+
+        lines.forEach(line => {
+            var gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            gridLine.setAttribute('x1', line.x1);
+            gridLine.setAttribute('y1', line.y1);
+            gridLine.setAttribute('x2', line.x2);
+            gridLine.setAttribute('y2', line.y2);
+            gridLine.setAttribute('stroke', gridColor); // Use outline color for grid lines
+            gridBackground.appendChild(gridLine);
+        });
+
+        // Append the grid background to the main SVG
+        svg.appendChild(gridBackground);
+
+        // Create a group for the strokes
+        var group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var transformData = HanziWriter.getScalingTransform(75, 75);
+        group.setAttributeNS(null, 'transform', transformData.transform);
+        svg.appendChild(group);
+
+        // Render each stroke path
+        strokes.forEach(function (strokePath) {
+            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttributeNS(null, 'd', strokePath);
+            path.style.fill = strokeColor; // Use stroke color for the character paths
+            group.appendChild(path);
+        });
+    }
+    const chineseCharacters = "{{ chinese_word.simplified }}"; // Get the characters
+    const container = document.getElementById('stroke-order-container');
+
+    // Function to load and render strokes for each character
+    function loadAndRenderCharacterStrokes(characters) {
+        characters.split('').forEach((char) => {
+            HanziWriter.loadCharacterData(char).then(function (charData) {
+                const target = document.createElement('div');
+                container.appendChild(target); // Create a new target for each character
+
+                // Render strokes for the character
+                for (var i = 0; i < charData.strokes.length; i++) {
+                    var strokesPortion = charData.strokes.slice(0, i + 1);
+                    renderFanningStrokes(target, strokesPortion);
+                }
+            }).catch(error => {
+                console.error(`Failed to load char data for ${char}:`, error);
+                const errorMessage = document.createElement('p');
+                errorMessage.innerText = `Stroke order data not available for ${char}.`;
+                container.appendChild(errorMessage);
+            });
+        });
+    }
+
+    // Call the function on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAndRenderCharacterStrokes(chineseCharacters);
+    });
+</script>
 {% endblock %}
