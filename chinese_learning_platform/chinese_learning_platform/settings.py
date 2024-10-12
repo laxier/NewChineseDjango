@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=pgv_mp-c3@v9*nxbns34*fc-c_^vrgmx@xmno@&sq4rulxz2q
 # DEBUG = True
 DEBUG = False
 
-ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'chinese-on-djang-hahshkj2wkj.amvera.io']
+ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'chinese-on-djang-hahshkj2wkj.amvera.io', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = [
     'http://192.168.0.100',
     'http://localhost',
