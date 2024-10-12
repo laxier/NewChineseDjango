@@ -22,11 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = 'django-insecure-=pgv_mp-c3@v9*nxbns34*fc-c_^vrgmx@xmno@&sq4rulxz2q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
-# DEBUG = False
+# DEBUG = True
+# INTERNAL_IPS = [
+#     "127.0.0.1",
+# ]
+DEBUG = False
 
 ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'chinese-on-djang-hahshkj2wkj.amvera.io', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = [
@@ -51,7 +51,11 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'frontend.apps.FrontendConfig',
     'rest_framework.authtoken',
-    'debug_toolbar',
+    # 'debug_toolbar',
+]
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.sql.SQLPanel',
 ]
 
 REST_FRAMEWORK = {
@@ -84,10 +88,6 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
-
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.sql.SQLPanel',
-]
 
 ROOT_URLCONF = 'chinese_learning_platform.urls'
 
