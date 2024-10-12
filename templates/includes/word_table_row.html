@@ -1,6 +1,11 @@
 <div class="table-row">
     <div class="row-item">
-        <div class="chinese">{{ word.simplified }}</div>
+        <div class="chinese"
+             data-id="{{ word.id }}"
+             data-pinyin="{{ word.pinyin }}"
+             data-meaning="{{ word.meaning }}">
+            {{ word.simplified }}
+        </div>
     </div>
     <div class="row-item">{{ word.pinyin }}</div>
     <div class="row-item">{{ word.meaning }}</div>

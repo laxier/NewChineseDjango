@@ -1,70 +1,64 @@
-let currentIndex = 0;
-let isChildClicked = false;
-
-function showModal(answer, index, chineseElements, isChildClicked) {
-    const modalBody = document.querySelector('.modal-body');
-    modalBody.innerHTML = ''; // Clear previous content
+// Function to show the modal
+function showModal(chineseElement) {
+    const modalBody = document.querySelector('#strokeOrderModal .modal-body'); // Select the modal body
     modalBody.style.display = 'flex';
     modalBody.style.flexDirection = 'column';
 
-    const controlsContainer = document.createElement('div');
-    controlsContainer.classList.add('controls-container');
-    controlsContainer.innerHTML = `
-        <button class="control-button prev-button">&lt;</button>
-        <button class="control-button next-button">&gt;</button>
-    `;
-    modalBody.appendChild(controlsContainer);
+    // Clear previous content
+    const characterContainer = document.getElementById('hanzi-writer');
+    characterContainer.innerHTML = ''; // Clear previous content
 
-    // Additional code for HanziWriter and fetching translations goes here
+    // Get the character and its details
+    const currentCharacter = chineseElement.textContent.trim();
+    const pinyin = chineseElement.getAttribute('data-pinyin');
+    const meaning = chineseElement.getAttribute('data-meaning');
 
-    $('#modal').modal('show');
+    const modalPinyinElement = document.getElementById("modalPinyin");
+    const modalMeaningElement = document.getElementById("modalMeaning");
 
-    const prevButton = document.querySelector('.prev-button');
-    const nextButton = document.querySelector('.next-button');
-
-    if (index === 0) {
-        prevButton.style.display = 'none';
+    // Set Pinyin and Meaning in the modal
+    if (modalPinyinElement && modalMeaningElement) {
+        modalPinyinElement.textContent = pinyin;
+        modalMeaningElement.textContent = meaning;
     } else {
-        prevButton.style.display = 'block';
+        console.error('Modal elements not found:', {
+            modalPinyinElement,
+            modalMeaningElement
+        });
+        return; // Exit the function if elements are not found
     }
 
-    if (index === chineseElements.length - 1) {
-        nextButton.style.display = 'none';
-    } else {
-        nextButton.style.display = 'block';
-    }
+    const answers = currentCharacter.split('');
 
-    prevButton.addEventListener('click', prevHandler);
-    nextButton.addEventListener('click', nextHandler);
+    const isDarkMode = localStorage.getItem('theme') === 'dark';
+    const strokeColor = isDarkMode ? '#ffffff' : '#333333';
+    const outlineColor = isDarkMode ? '#333333' : '#ffffff';
+
+    // Create character elements and HanziWriter instances
+    answers.forEach(function (char, idx) {
+        var charTargetId = 'character-target-' + (idx + 1);
+        var charDiv = document.createElement('div');
+        charDiv.id = charTargetId;
+        charDiv.style.width = '100px';
+        charDiv.style.height = '100px';
+        characterContainer.appendChild(charDiv); // Append to character container
+
+        var writer = HanziWriter.create(charTargetId, char, {
+            width: 100,
+            height: 100,
+            padding: 5,
+            strokeAnimationSpeed: 1.5,
+            delayBetweenStrokes: 20,
+            strokeColor: strokeColor,
+            outlineColor: outlineColor,
+        });
+
+        // Animate character on click
+        charDiv.addEventListener('click', function () {
+            writer.animateCharacter();
+        });
+    });
+
+    // Show the Bootstrap modal
+    $('#strokeOrderModal').modal('show');
 }
-
-function fetchTranslation(char) {
-    return fetch('/api/translate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 'char': char })
-    })
-    .then(response => response.json())
-    .catch(error => console.error('Ошибка:', error));
-}
-
-// Define the keyHandler function
-function keyHandler(event) {
-    // Navigate through the elements using arrow keys
-    if (event.key === "ArrowLeft") {
-        const prevButton = document.querySelector('.prev-button');
-        if (prevButton && prevButton.style.display !== 'none') {
-            prevButton.click(); // Simulate click on the previous button
-        }
-    } else if (event.key === "ArrowRight") {
-        const nextButton = document.querySelector('.next-button');
-        if (nextButton && nextButton.style.display !== 'none') {
-            nextButton.click(); // Simulate click on the next button
-        }
-    }
-}
-
-// Add event listener for keydown events
-document.addEventListener('keydown', keyHandler);

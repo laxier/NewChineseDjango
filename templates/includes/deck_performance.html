@@ -63,7 +63,6 @@
                 const date = chartData.labels[index];
                 const percentage = chartData.datasets[0].data[index];
                 const wrongAnswers = {{ deck_data.wrong_answers | safe }}[index];
-                console.log(wrongAnswers)
 
                 const infoContainer = document.getElementById('info-container');
                 let wrongAnswersHTML = wrongAnswers.map(answer => `
@@ -82,6 +81,10 @@
                     Процент: ${percentage}%,
                     Неправильные ответы: ${wrongAnswersHTML}
                 `;
+                const wrongAnswerElements = document.querySelectorAll('.wrong-answer.chinese');
+                wrongAnswerElements.forEach(element => {
+                    element.addEventListener('click', () => showModal(element)); // Call showModal on click
+                });
             }
         });
     });

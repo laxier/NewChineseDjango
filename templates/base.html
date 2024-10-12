@@ -34,28 +34,17 @@
     </div>
     {% endif %}
     {% block content %}{% endblock %}
-
-    <div class="modal fade" id="modal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Stroke order</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
 </main>
+{% include 'includes/order_modal.html' %}
 
 <footer class="footer mt-auto py-3 d-flex container">
     <div class="container">
         <span>Тимофеев Кирилл, 2024</span>
     </div>
 </footer>
+<script src="https://cdn.rawgit.com/xylo/hanzi-writer/v3.0.0/dist/hanziwriter.min.js"></script>
 <script src="{% static 'theme.js' %}"></script>
-<script src="{% static 'modal.js' %}"></script>
 <script src="{% static 'scroll.js' %}"></script>
 <script>
 const isAuthenticated = {% if current_user.is_authenticated %}    true;{% else %}    false;{% endif %}
@@ -63,51 +52,6 @@ const isAuthenticated = {% if current_user.is_authenticated %}    true;{% else %
 <script src="{% static 'accuracy.js' %}"></script>
 </body>
 
-
-<script>
-    function showModal(answer, index, chineseElements, isChildClicked) {
-        const modalBody = document.querySelector('.modal-body');
-        modalBody.innerHTML = ''; // Clear previous content
-        modalBody.style.display = 'flex';
-        modalBody.style.flexDirection = 'column';
-
-        const controlsContainer = document.createElement('div');
-        controlsContainer.classList.add('controls-container');
-        controlsContainer.innerHTML = `
-        <button class="control-button prev-button">&lt;</button>
-        <button class="control-button next-button">&gt;</button>
-    `;
-        modalBody.appendChild(controlsContainer);
-
-        // Show the modal
-        $('#modal').modal('show');
-
-        const prevButton = document.querySelector('.prev-button');
-        const nextButton = document.querySelector('.next-button');
-
-        if (index === 0) {
-            prevButton.style.display = 'none';
-        } else {
-            prevButton.style.display = 'block';
-        }
-
-        if (index === chineseElements.length - 1) {
-            nextButton.style.display = 'none';
-        } else {
-            nextButton.style.display = 'block';
-        }
-
-        prevButton.addEventListener('click', prevHandler);
-        nextButton.addEventListener('click', nextHandler);
-    }
-
-    // Add event listener for dynamically generated elements
-    document.querySelectorAll('.open-modal-button').forEach(element => {
-        element.addEventListener('click', function () {
-            showModal(answer, index, chineseElements, isChildClicked);
-        });
-    });
-</script>
 {% block scripts %}
 {% endblock %}
 </html>
