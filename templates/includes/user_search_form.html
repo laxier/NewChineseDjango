@@ -7,13 +7,13 @@ File: templates/includes/user_search_form.html
         {{ search_form.search }}
         <div class="input-group-append">
             <select class="form-control" name="review_period">
-        <option value="" {% if review_period == '' %}selected{% endif %}>All</option>
-        <option value="last_week" {% if review_period == 'last_week' %}selected{% endif %}>Last Week</option>
-        <option value="last_three_days" {% if review_period == 'last_three_days' %}selected{% endif %}>Last 3 Days</option>
-        <option value="last_day" {% if review_period == 'last_day' %}selected{% endif %}>Last Day</option>
-        <option value="zero" {% if review_period == 'zero' %}selected{% endif %}>Future</option>
-        <option value="three_days" {% if review_period == 'three_days' %}selected{% endif %}>Next 3 Days</option>
-        <option value="week" {% if review_period == 'week' %}selected{% endif %}>Next Week</option>
+                <option value="" {% if review_period == '' %}selected{% endif %}>All</option>
+                <option value="last_week" {% if review_period == 'last_week' %}selected{% endif %}>Last Week</option>
+                <option value="last_three_days" {% if review_period == 'last_three_days' %}selected{% endif %}>Last 3 Days</option>
+                <option value="last_day" {% if review_period == 'last_day' %}selected{% endif %}>Last Day</option>
+                <option value="zero" {% if review_period == 'zero' %}selected{% endif %}>Future</option>
+                <option value="three_days" {% if review_period == 'three_days' %}selected{% endif %}>Next 3 Days</option>
+                <option value="week" {% if review_period == 'week' %}selected{% endif %}>Next Week</option>
             </select>
         </div>
         <div class="input-group-append" style="margin-right: 0.5rem;">
@@ -25,7 +25,6 @@ File: templates/includes/user_search_form.html
         </div>
         <div class="input-group-append">
             <select class="form-control" name="sort_by">
-                <option value="edited" {% if request.GET.sort_by == 'edited' %}selected{% endif %}>По дате изучения</option>
                 <option value="accuracy_percentage" {% if request.GET.sort_by == 'accuracy_percentage' %}selected{% endif %}>По точности</option>
                 <option value="next_review_date" {% if request.GET.sort_by == 'next_review_date' %}selected{% endif %}>По дате повтора</option>
             </select>
@@ -38,6 +37,10 @@ File: templates/includes/user_search_form.html
         </div>
         <div class="input-group-append">
             <button class="btn btn-primary" type="submit">Поиск</button>
+        </div>
+        <!-- Add Test Button -->
+        <div class="input-group-append">
+            <button class="btn btn-secondary" type="submit" formaction="{% url 'frontend:review_words' %}">Повторить</button>
         </div>
     </div>
 </form>

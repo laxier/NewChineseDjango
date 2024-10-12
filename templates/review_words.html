@@ -3,11 +3,23 @@
 {% block content %}
 <input type="hidden" id="user-id" value="{{ current_user.id }}">
 <div class="container">
-    <h1>Тема: <a href="/deck/{{ deck.id }}">{{ deck.name }}</a></h1>
-
+    <h1>Повторение слов за период: {{ period }}</a></h1>
+    {% if hsk_levels %}
+        <h2>Выбранные уровни HSK:</h2>
+        <ul>
+            {% for level in hsk_levels %}
+                <li>{{ level }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% if to_test %}
     {% include "includes/flashcard.html" %}
 
     {% include "includes/card_table.html" %}
+    {% else %}
+    <h2>Нет слов для тестирования</h2>
+    <p>Пока у вас нет слов, которые нужно повторить.</p>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -126,7 +138,7 @@
 
         function sendResultToAPI(isCorrect) {
             const userId = document.getElementById("user-id").value;
-            const wordPerformanceId = Rows[currentFlashcardIndex].querySelector('.perf-id').value;
+            const wordPerformanceId = Rows[currentFlashcardIndex].querySelector('input[type="hidden"]').value;
 
             const url = isCorrect
                 ? `${window.location.origin}/api/v1/word-performance/${wordPerformanceId}/correct/`

@@ -6,6 +6,7 @@
     <h1>Статистика изучения слов</h1>
     {% include 'includes/user_search_form.html' %}
     {% if performances %}
+    <h2>Найдено {{ total_performances_count }} записей</h2>
     {% include 'includes/performance_table.html' %}
     {% else %}
     <p>Статистика не найдена</p>
