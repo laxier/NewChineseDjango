@@ -17,7 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
-
+from debug_toolbar.toolbar import debug_toolbar_urls
+from django.conf import settings
 
 urlpatterns = [
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
@@ -25,3 +26,8 @@ urlpatterns = [
     path('api/v1/', include('api.urls')),
     path('', include('frontend.urls'))
 ]
+
+if settings.DEBUG:  # Ensure to import settings if not already done
+    urlpatterns += [
+        path('__debug__/', include('debug_toolbar.urls')),  # Include Debug Toolbar URLs
+    ]

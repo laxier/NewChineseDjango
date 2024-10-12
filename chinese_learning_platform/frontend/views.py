@@ -17,11 +17,13 @@ from django.core.cache import cache
 
 User = get_user_model()
 
+
 class CurrentUserMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['current_user'] = self.request.user
         return context
+
 
 class IndexPageView(LoginRequiredMixin, View):
     template_name = 'index.html'
@@ -45,7 +47,7 @@ class IndexPageView(LoginRequiredMixin, View):
     def get_recent_decks(self, user):
         """Fetch the latest 4 decks for the user and return Deck instances with UserDeck data."""
         user_decks = user.userdeck_set.all()
-        return Deck.objects.prefetch_related(
+        return Deck.objects.select_related('creator').prefetch_related(
             Prefetch('userdeck_set',
                      queryset=user_decks.filter(user=user),
                      to_attr='user_deck')
@@ -77,13 +79,12 @@ class UserDecksView(LoginRequiredMixin, CurrentUserMixin, ListView):
 
     def get_user_decks(self, user):
         """Get the decks related to the user and order them by the UserDeck timestamp."""
-        return Deck.objects.filter(users=user).prefetch_related(
-            Prefetch(
-                'userdeck_set',
-                queryset=UserDeck.objects.filter(user=user).only('id', 'percent', 'deck_id', 'timestamp'),
-                to_attr='user_deck'
-            )
-        ).order_by('-userdeck__timestamp')
+        user_decks = user.userdeck_set.all()
+        return Deck.objects.select_related('creator').prefetch_related(
+            Prefetch('userdeck_set',
+                     queryset=user_decks.filter(user=user),
+                     to_attr='user_deck')
+        ).filter(creator=user).order_by('-userdeck__edited')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -158,26 +159,28 @@ class AllWordsView(WordPaginationMixin, CurrentUserMixin, ListView):
             )
         return queryset
 
+
 class WordFilteringMixin:
     def apply_review_period_filter(self, queryset):
         """Applies filtering based on the selected review period."""
         review_period = self.request.GET.get('review_period', '')
         now = timezone.now()
 
-        if review_period == 'last_week':
-            queryset = queryset.filter(next_review_date__gte=now - timedelta(days=7), next_review_date__lte=now)
-        elif review_period == 'last_three_days':
-            queryset = queryset.filter(next_review_date__gte=now - timedelta(days=3), next_review_date__lte=now)
-        elif review_period == 'last_day':
-            queryset = queryset.filter(next_review_date__gte=now - timedelta(days=1), next_review_date__lte=now)
-        elif review_period == '':
-            queryset = queryset
-        elif review_period == 'zero':
-            queryset = queryset.filter(next_review_date__gte=now)
-        elif review_period == 'three_days':
-            queryset = queryset.filter(next_review_date__lte=now + timedelta(days=3), next_review_date__gte=now)
-        elif review_period == 'week':
-            queryset = queryset.filter(next_review_date__lte=now + timedelta(days=7), next_review_date__gte=now)
+        review_periods = {
+            'last_week': (now - timedelta(days=7), now),
+            'last_three_days': (now - timedelta(days=3), now),
+            'last_day': (now - timedelta(days=1), now),
+            'zero': (now, None),
+            'three_days': (now, now + timedelta(days=3)),
+            'week': (now, now + timedelta(days=7)),
+        }
+
+        if review_period in review_periods:
+            start_date, end_date = review_periods[review_period]
+            if end_date:
+                queryset = queryset.filter(next_review_date__gte=start_date, next_review_date__lte=end_date)
+            else:
+                queryset = queryset.filter(next_review_date__gte=start_date)
 
         return queryset
 
@@ -245,6 +248,7 @@ class UserWordsView(LoginRequiredMixin, CurrentUserMixin, WordFilteringMixin, Wo
         context['total_performances_count'] = total_performances_count
         return context
 
+
 class ReviewWordsView(CurrentUserMixin, WordFilteringMixin, ListView):
     model = WordPerformance
     template_name = 'review_words.html'
@@ -258,7 +262,6 @@ class ReviewWordsView(CurrentUserMixin, WordFilteringMixin, ListView):
         queryset = self.apply_search_filter(queryset)
         queryset = self.apply_review_period_filter(queryset)
         queryset = self.apply_hsk_level_filter(queryset)
-        queryset = self.apply_sorting(queryset)
 
         return queryset  # Return the filtered queryset
 
@@ -286,6 +289,7 @@ class ReviewWordsView(CurrentUserMixin, WordFilteringMixin, ListView):
             }
             for performance in due_words
         ]
+
 
 def translate_to_russian(review_period=None, hsk_levels=None):
     """Transform review period and HSK levels to Russian verbose names."""
