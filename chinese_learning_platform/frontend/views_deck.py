@@ -8,7 +8,8 @@ import re
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import Prefetch
-
+from .serializers import WrongAnswerSerializer
+from django.http import JsonResponse
 class CurrentUserMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -64,7 +65,10 @@ class DeckDetailView(CurrentUserMixin, CurrentDateTimeMixin, DetailView):
         for performance in deck_performances:
             data["test_dates"].append(performance.test_date.strftime('%Y-%m-%d'))
             data["percent_correct"].append(performance.percent_correct)
-            data["wrong_answers"].append(performance.wrong_answers)
+            wrong_word_details = performance.wrong_answers.all()
+            serializer = WrongAnswerSerializer(wrong_word_details, many=True)
+            data["wrong_answers"].append(serializer.data)
+
             data["ids"].append(performance.id)
         return data
 

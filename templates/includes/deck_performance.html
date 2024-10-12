@@ -63,9 +63,25 @@
                 const date = chartData.labels[index];
                 const percentage = chartData.datasets[0].data[index];
                 const wrongAnswers = {{ deck_data.wrong_answers | safe }}[index];
+                console.log(wrongAnswers)
 
                 const infoContainer = document.getElementById('info-container');
-                infoContainer.innerHTML = `Дата: ${date}, Процент: ${percentage}%, Неправильные ответы: ${wrongAnswers}`;
+                let wrongAnswersHTML = wrongAnswers.map(answer => `
+                                <span class="wrong-answer chinese"
+                                      data-id="${answer.id}"
+                                      data-pinyin="${answer.pinyin}"
+                                      data-meaning="${answer.meaning}"
+                                      >
+                                    ${answer.simplified}
+                                </span>
+                        `).join(', '); // Join to create a single string from the array
+
+                // Create the infoContainer HTML
+                infoContainer.innerHTML = `
+                    Дата: ${date},
+                    Процент: ${percentage}%,
+                    Неправильные ответы: ${wrongAnswersHTML}
+                `;
             }
         });
     });
