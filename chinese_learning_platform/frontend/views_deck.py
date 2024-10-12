@@ -23,37 +23,54 @@ class CurrentDateTimeMixin:
         context['now'] = timezone.now()
         return context
 
+
 class DeckDetailView(CurrentUserMixin, CurrentDateTimeMixin, DetailView):
     model = Deck
     template_name = 'deck_detail.html'
     context_object_name = 'deck'
 
     def get_queryset(self):
-        """
-        Prefetch words and their related performances for the current user using a 'double index'.
-        This method retrieves Deck -> Words -> Performance efficiently.
-        """
-        return Deck.objects.prefetch_related(
-            Prefetch('words', queryset=ChineseWord.objects.prefetch_related(
-                Prefetch('performance', queryset=WordPerformance.objects.filter(user=self.request.user))
-            ))
+        return Deck.objects.select_related('creator').prefetch_related(
+            Prefetch(
+                'words',
+                queryset=self.get_words_queryset(),
+                to_attr='prefetched_words'
+            )
         )
+
+    def get_words_queryset(self):
+        words_queryset = ChineseWord.objects.all()
+        if self.request.user.is_authenticated:
+            return words_queryset.prefetch_related(
+                Prefetch(
+                    'performance',
+                    queryset=WordPerformance.objects.filter(user=self.request.user),
+                    to_attr='user_performance'
+                )
+            )
+        return words_queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         deck = self.object
         current_user = self.request.user
-        words_in_deck = deck.words.all()
 
         if current_user.is_authenticated:
-            performances = WordPerformance.objects.filter(word__in=words_in_deck, user=current_user)
-            context['performances'] = performances
-            deck_performance = DeckPerformance.objects.filter(deck=deck, user=current_user)
-            context['deck_data'] = self.get_performance_data(deck_performance)
+            context['performances'] = self.get_user_performances(deck.prefetched_words)
+            context['deck_data'] = self.get_performance_data(
+                DeckPerformance.objects.filter(deck=deck, user=current_user).prefetch_related('wrong_answers')
+            )
+            context["in_user_cards"] = deck in current_user.decks.all()
         else:
-            context['words'] = words_in_deck
+            context['words'] = deck.prefetched_words
+            context["in_user_cards"] = False
 
         return context
+
+    def get_user_performances(self, words):
+        # Use a dictionary for faster access
+        performance_dict = {word.id: word.user_performance[0] if word.user_performance else None for word in words}
+        return [performance_dict[word.id] for word in words]
 
     def get_performance_data(self, deck_performances):
         data = {
@@ -62,15 +79,20 @@ class DeckDetailView(CurrentUserMixin, CurrentDateTimeMixin, DetailView):
             "wrong_answers": [],
             "ids": []
         }
+
         for performance in deck_performances:
             data["test_dates"].append(performance.test_date.strftime('%Y-%m-%d'))
             data["percent_correct"].append(performance.percent_correct)
+
+            # Serialize wrong answers only once since they are prefetched
             wrong_word_details = performance.wrong_answers.all()
             serializer = WrongAnswerSerializer(wrong_word_details, many=True)
             data["wrong_answers"].append(serializer.data)
 
             data["ids"].append(performance.id)
+
         return data
+
 
 class EditDeckView(CurrentUserMixin, UpdateView):
     model = Deck
@@ -180,24 +202,28 @@ class ReviewDeckMixin(DeckMixin, CurrentDateTimeMixin):
         return get_object_or_404(Deck, id=deck_id)
 
     def filter_due_words(self, deck):
-        # Prefetch related performance data for the words in the deck
-        words_with_performance = deck.words.prefetch_related('performance')
+        # Prefetch words and their performance data
+        words_with_performance = deck.words.prefetch_related(
+            Prefetch('performance', queryset=WordPerformance.objects.filter(user=self.request.user))
+        )
+        performances = WordPerformance.objects.filter(user=self.request.user,
+                                                      word__in=words_with_performance).select_related('word')
+        performance_map = {performance.word_id: performance for performance in performances}
 
         due_words = []
 
         for word in words_with_performance:
-            performance = word.performance.filter(user=self.request.user).first()
-            if self.is_due_for_review(word):  # Only include if due for review
+            performance = performance_map.get(word.id)  # This will be None if no performance exists
+            if self.is_due_for_review(word, performance):
                 due_words.append({
                     'word': word,
-                    'performance': performance  # Will be None if no performance exists
+                    'performance': performance
                 })
 
         return due_words
 
-    def is_due_for_review(self, word):
-        performance = word.performance.filter(user=self.request.user).first()
-        if performance and performance.next_review_date:
+    def is_due_for_review(self, word, performance):
+        if performance:
             return performance.next_review_date <= timezone.now()
         return False
 
@@ -208,10 +234,6 @@ class ReviewDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
     context_object_name = 'deck'
 
     def get_queryset(self):
-        """
-        Prefetch related words and their performances for the current user using a 'double index'.
-        This method retrieves Deck -> Words -> Performance efficiently.
-        """
         return Deck.objects.prefetch_related(
             Prefetch('words', queryset=ChineseWord.objects.prefetch_related(
                 Prefetch('performance', queryset=WordPerformance.objects.filter(user=self.request.user))
@@ -222,6 +244,7 @@ class ReviewDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
         context = super().get_context_data(**kwargs)
         deck = self.get_deck()
         context['to_test'] = self.filter_due_words(deck)
+        print("Words to test:", context['to_test'])
         context['deck'] = deck
         return context
 
@@ -232,10 +255,6 @@ class TestDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
     context_object_name = 'deck'
 
     def get_queryset(self):
-        """
-        Use double index to prefetch words and their performances efficiently.
-        Deck -> Words -> Performance (filtered by the current user).
-        """
         return Deck.objects.prefetch_related(
             Prefetch('words', queryset=ChineseWord.objects.prefetch_related(
                 Prefetch('performance', queryset=WordPerformance.objects.filter(user=self.request.user))
@@ -244,28 +263,17 @@ class TestDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        deck = self.get_deck()  # Retrieve the deck
-        context['deck'] = deck  # Add deck to context
-
-        # Use mixin method to get words due for testing
+        deck = self.get_deck()
+        context['deck'] = deck
         context['to_test'] = self.filter_due_words(deck)
-
         return context
 
-    def filter_due_words(self, deck):
-        """
-        Filter words in the deck that are due for testing, reusing the mixin method.
-        """
-        due_words = []
-        for word in deck.words.prefetch_related('performance'):
-            performance = word.performance.filter(user=self.request.user).first()
-            if performance:
-                due_words.append({
-                    'word': word,
-                    'performance': performance
-                })
-        return due_words
+    def get_deck(self):
+        deck_id = self.kwargs.get('pk')
+        return get_object_or_404(Deck, id=deck_id)
 
+    def is_due_for_review(self, word, performance):
+        return True
 class AddDeckView(CreateView):
     model = Deck
     template_name = 'add_deck.html'

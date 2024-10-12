@@ -9,7 +9,7 @@
     {% if current_user.id == deck.creator_id or current_user.username == 'admin' %}
     <a href="{% url 'frontend:edit_deck' deck.id %}" class="btn btn-outline-secondary">Редактировать</a>
     {% endif %}
-    {% if deck in current_user.decks.all %}
+    {% if in_user_cards %}
     <a href="{% url 'frontend:review_deck' deck.id %}" class="btn btn-outline-secondary">Повторить</a>
     <a href="{% url 'frontend:test_deck' deck.id %}" class="btn btn-outline-secondary">Тест</a>
     {% else %}
@@ -22,7 +22,7 @@
 
 {% if deck.words %}
     {% if current_user.is_authenticated %}
-        {% if deck in current_user.decks.all %}
+        {% if in_user_cards %}
             {% include "includes/deck_performance.html" %}
         {% endif %}
         {% include "includes/performance_table.html" with performances=performances %}
