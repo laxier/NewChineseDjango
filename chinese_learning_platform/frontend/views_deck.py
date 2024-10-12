@@ -244,7 +244,6 @@ class ReviewDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
         context = super().get_context_data(**kwargs)
         deck = self.get_deck()
         context['to_test'] = self.filter_due_words(deck)
-        print("Words to test:", context['to_test'])
         context['deck'] = deck
         return context
 
@@ -274,6 +273,7 @@ class TestDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
 
     def is_due_for_review(self, word, performance):
         return True
+
 class AddDeckView(CreateView):
     model = Deck
     template_name = 'add_deck.html'

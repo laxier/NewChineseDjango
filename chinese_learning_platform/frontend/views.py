@@ -255,7 +255,6 @@ class ReviewWordsView(CurrentUserMixin, WordFilteringMixin, ListView):
     context_object_name = 'performances'
 
     def get_queryset(self):
-        # Start with the queryset for the logged-in user
         queryset = WordPerformance.objects.filter(user=self.request.user).select_related('word')
 
         # Apply filters
@@ -263,7 +262,8 @@ class ReviewWordsView(CurrentUserMixin, WordFilteringMixin, ListView):
         queryset = self.apply_review_period_filter(queryset)
         queryset = self.apply_hsk_level_filter(queryset)
 
-        return queryset  # Return the filtered queryset
+        queryset = self.apply_sorting(queryset)
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
