@@ -1,13 +1,19 @@
 import requests
 from bs4 import BeautifulSoup
 from django.db import models
+from django.db.models import UniqueConstraint
 
 class ChineseWord(models.Model):
-    simplified = models.CharField(max_length=50, unique=True)
+    simplified = models.CharField(max_length=50)
     traditional = models.CharField(max_length=50, blank=True, null=True)
     pinyin = models.CharField(max_length=100, blank=True, null=True)
     meaning = models.TextField(blank=True, null=True)
     hsk_level = models.CharField(null=True, blank=True, max_length=10)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['simplified', 'pinyin', 'meaning'], name='unique_simplified_pinyin_meaning')
+        ]
 
     def __str__(self):
         return f"{self.simplified} ({self.pinyin})"
