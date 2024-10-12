@@ -198,7 +198,7 @@ class ReviewDeckMixin(DeckMixin, CurrentDateTimeMixin):
         return False
 
 
-class ReviewDeckView(CurrentUserMixin, ListView):
+class ReviewDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
     model = Deck
     template_name = 'review_deck.html'
     context_object_name = 'deck'
