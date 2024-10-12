@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<h1>{{ chinese_word.simplified }}</h1>
+<p>Pinyin: {{ chinese_word.pinyin }}</p>
+<p>Meaning: {{ chinese_word.meaning }}</p>
+<p>HSK{{ chinese_word.hsk_level }}</p>
+<h2>Sentences</h2>
+<ul>
+    {% for sentence in sentences %}
+    <li>{{ sentence.content }} : {{ sentence.meaning }}</li>
+    {% empty %}
+    <li>No sentences available.</li>
+    {% endfor %}
+</ul>
+{% if related_words %}
+<h2>Related Words</h2>
+<ul>
+    {% for related_word in related_words %}
+    <li>{{ related_word.related_word.simplified }}</li>
+    {% empty %}
+    <li>No related words available.</li>
+    {% endfor %}
+</ul>
+{%endif%}
+{% endblock %}

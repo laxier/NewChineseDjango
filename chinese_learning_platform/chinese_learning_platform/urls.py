@@ -24,7 +24,7 @@ urlpatterns = [
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('admin/', admin.site.urls),
     path('api/v1/', include('api.urls')),
-    path('', include('frontend.urls'))
+    path('', include('frontend.urls')),
 ]
 
 if settings.DEBUG:  # Ensure to import settings if not already done
