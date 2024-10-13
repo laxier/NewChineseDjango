@@ -21,18 +21,87 @@
 </div>
 
 {% if deck.words %}
-    {% if current_user.is_authenticated %}
-        {% if in_user_cards %}
-            {% include "includes/deck_performance.html" %}
-        {% endif %}
-        {% include "includes/performance_table.html" with performances=performances %}
-    {% else %}
-        {% include "includes/word_table.html" %}
-    {% endif %}
+{% if current_user.is_authenticated %}
+{% if in_user_cards %}
+{% include "includes/deck_performance.html" %}
+{% endif %}
+{% include "includes/performance_table.html" with performances=performances %}
 {% else %}
-    <p>No cards yet.</p>
+{% include "includes/word_table.html" %}
+{% endif %}
+{% else %}
+<p>No cards yet.</p>
 {% endif %}
 {% endblock %}
 
-{% block sort %}
+{% block scripts %}
+<script>
+    // Initialize currentSort variable
+    let currentSort = {
+        column: '',
+        order: 'asc'
+    };
+
+    // Function to sort the table based on the specified column
+    function sortTable(column) {
+        const tableContainer = document.querySelector('.table-container');
+        const rows = Array.from(tableContainer.querySelectorAll('.table-row:not(.heading)'));
+
+        // Determine new sort order
+        if (currentSort.column === column) {
+            currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.order = 'asc';
+        }
+
+        // Sort rows based on the selected column
+        rows.sort((a, b) => {
+            let aValue, bValue;
+
+            if (column === 'accuracy_percentage') {
+                aValue = parseFloat(a.querySelector('.percent').textContent.replace('%', '').trim());
+                bValue = parseFloat(b.querySelector('.percent').textContent.replace('%', '').trim());
+            } else if (column === 'next_review_date') {
+                const aDateElement = a.querySelector('.next-review-date');
+                const bDateElement = b.querySelector('.next-review-date');
+
+                if (!aDateElement || !bDateElement) {
+                    return 0; // If either element does not exist, don't sort
+                }
+
+                // Use the hidden value for sorting
+                aValue = new Date(aDateElement.textContent.trim());
+                bValue = new Date(bDateElement.textContent.trim());
+            }
+
+            return currentSort.order === 'asc' ? aValue - bValue : bValue - aValue;
+        });
+
+        // Remove existing rows and append sorted rows
+        rows.forEach(row => tableContainer.appendChild(row));
+
+        // Update header styles based on the current sort state
+        updateHeaderStyles(column);
+    }
+
+    // Function to update header styles based on current sort state
+    function updateHeaderStyles(column) {
+        const percentHeader = document.querySelector('.percent-header');
+        const dateHeader = document.querySelector('.date-header');
+
+        percentHeader.classList.remove('ascending', 'descending');
+        dateHeader.classList.remove('ascending', 'descending');
+
+        if (currentSort.column === 'accuracy_percentage') {
+            percentHeader.classList.add(currentSort.order === 'asc' ? 'ascending' : 'descending');
+        } else if (currentSort.column === 'next_review_date') {
+            dateHeader.classList.add(currentSort.order === 'asc' ? 'ascending' : 'descending');
+        }
+    }
+
+    // Initial call to set header styles based on the current sort state
+    updateHeaderStyles(currentSort.column);
+</script>
+
 {% endblock %}
