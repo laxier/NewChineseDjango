@@ -789,11 +789,69 @@ main {
 
 @media (max-width: 426px) {
     .row {
-        flex-direction: column;!important;
+        flex-direction: column;
+    !important;
     }
 }
+
 @media (max-width: 400px) {
     .form-check-label {
         white-space: normal;
     }
+}
+
+.dark-theme .list-group-item {
+    background-color: #495057; /* Darker background for list items */
+    border-color: #6c757d; /* Lighter border color */
+    color: aliceblue;
+}
+.dark-theme .modal-footer{
+    border: var(--black-border);
+}
+.dark-theme .list-group-item:hover {
+    background-color: #6c757d; /* Hover effect */
+}
+
+.dark-theme .btn-primary {
+    background-color: #007bff; /* Primary button color */
+    border-color: #007bff; /* Border color */
+}
+
+.dark-theme .btn-danger {
+    background-color: #dc3545; /* Danger button color */
+    border-color: #dc3545; /* Border color */
+}
+.dark-theme .btn-close {
+    background: none; /* Remove the default SVG background */
+    border: none; /* Remove any borders */
+    color: #ffffff; /* Set the color of the "X" to white */
+    font-size: 2.5rem; /* Adjust the font size as needed */
+    padding: 0; /* Remove default padding */
+    width: 40px; /* Set a fixed width for the button */
+    height: 40px; /* Set a fixed height for the button */
+    display: flex; /* Use flexbox for centering */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    margin: 0; /* Ensure no margins affect centering */
+}
+
+/* Ensure the pseudo-element is centered within the button */
+.dark-theme .btn-close::before {
+    content: '×'; /* Unicode character for multiplication sign (X) */
+    font-weight: bold; /* Adjust font weight if necessary */
+    line-height: 1; /* Keep line-height minimal */
+    display: inline-block; /* Ensure it's treated as a block for centering */
+    text-align: center; /* Center text */
+    vertical-align: middle; /* Align vertically */
+}
+
+/* Hover state for the close button */
+.dark-theme .btn-close:hover {
+    color: #dc3545;
+}
+
+/* Active state for the close button */
+.dark-theme .btn-close:focus {
+    outline: none; /* Remove outline */
+    box-shadow: 0 0 0.2rem rgba(255, 255, 255, 0.5); /* Optional: Add shadow for focus */
 }
