@@ -9,12 +9,12 @@
     {% include 'includes/user_favorites_search_form.html' %}
     <div class="table-container">
         <div class="table-row heading">
-            <div class="row-item">Слово</div>
-            <div class="row-item">Произношение</div>
-            <div class="row-item">Перевод</div>
-            <div class="row-item">Статистика</div>
-            <div class="row-item percent-header">Процент</div>
-            <div class="row-item date-header">Повторение</div>
+            <div class="row-item" onclick="sortTable('word')">Слово</div>
+            <div class="row-item" onclick="sortTable('pinyin')">Произношение</div>
+            <div class="row-item" onclick="sortTable('meaning')">Перевод</div>
+            <div class="row-item" onclick="sortTable('performance')">Статистика</div>
+            <div class="row-item percent-header" onclick="sortTable('accuracy_percentage')">Процент</div>
+            <div class="row-item date-header" onclick="sortTable('next_review_date')">Повторение</div>
             <div class="row-item action-header">Действие</div>
         </div>
 
@@ -82,4 +82,60 @@
             .catch(error => console.error('Error:', error));
     }
 </script>
+<script>
+    let currentSort = { column: '', order: 'asc' };
+
+    function sortTable(column) {
+        const url = new URL(window.location);
+        const params = new URLSearchParams(url.search);
+
+        // Determine new order
+        if (currentSort.column === column) {
+            currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.order = 'asc';
+        }
+
+        // Set sorting parameters
+        params.set('sort_by', currentSort.column);
+        params.set('sort_order', currentSort.order);
+        window.location.search = params.toString(); // Redirect to the new URL
+
+        // Update header styles
+        updateHeaderStyles(column);
+    }
+
+    function updateHeaderStyles(column) {
+        const percentHeader = document.querySelector('.percent-header');
+        const dateHeader = document.querySelector('.date-header');
+
+        // Reset styles
+        percentHeader.classList.remove('ascending', 'descending');
+        dateHeader.classList.remove('ascending', 'descending');
+
+        // Apply styles based on current sort
+        if (currentSort.column === 'accuracy_percentage') {
+            percentHeader.classList.add(currentSort.order === 'asc' ? 'ascending' : 'descending');
+        } else if (currentSort.column === 'next_review_date') {
+            dateHeader.classList.add(currentSort.order === 'asc' ? 'ascending' : 'descending');
+        }
+    }
+
+    function setInitialSortStyles() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sortBy = urlParams.get('sort_by');
+        const sortOrder = urlParams.get('sort_order');
+
+        // Set current sort based on URL parameters
+        if (sortBy) {
+            currentSort.column = sortBy;
+            currentSort.order = sortOrder || 'asc'; // Default to 'asc' if no order is specified
+            updateHeaderStyles(currentSort.column); // Update styles based on current sort
+        }
+    }
+    window.onload = setInitialSortStyles;
+</script>
+
+
 {% endblock %}

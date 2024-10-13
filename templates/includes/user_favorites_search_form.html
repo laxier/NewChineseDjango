@@ -1,7 +1,3 @@
-{% comment %}
-File: templates/includes/user_favorites_search_form.html
-{% endcomment %}
-
 <form method="GET" action="{% url 'frontend:user_favorites' %}">
     <div class="input-group mb-3">
         {{ search_form.search }}
@@ -12,25 +8,9 @@ File: templates/includes/user_favorites_search_form.html
                 {% endfor %}
             </select>
         </div>
-
-        <div class="input-group-append">
-            <select class="form-control" name="sort_by">
-                <option value="accuracy_percentage" {% if request.GET.sort_by == 'accuracy_percentage' %}selected{% endif %}>По точности</option>
-                <option value="next_review_date" {% if request.GET.sort_by == 'next_review_date' %}selected{% endif %}>По дате повтора</option>
-            </select>
-        </div>
-
-        <div class="input-group-append">
-            <select class="form-control" name="sort_order">
-                <option value="desc" {% if request.GET.sort_order == 'desc' %}selected{% endif %}>По убыванию</option>
-                <option value="asc" {% if request.GET.sort_order == 'asc' %}selected{% endif %}>По возрастанию</option>
-            </select>
-        </div>
-
         <div class="input-group-append">
             <button class="btn btn-primary" type="submit">Поиск</button>
         </div>
-
         <div class="input-group-append">
             <button class="btn btn-secondary" type="submit" formaction="{% url 'frontend:review_words' %}">Повторить</button>
         </div>
