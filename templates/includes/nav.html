@@ -13,9 +13,9 @@
             Слова
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="{% url 'frontend:user_favorites'%}">Любимые слова</a></li>
-            <li><a class="dropdown-item" href="{% url 'frontend:user_words'%}">Слова изученные</a></li>
+            <li><a class="dropdown-item" href="{% url 'frontend:user_words'%}">Изученные слова</a></li>
             <li><a class="dropdown-item" href="{% url 'frontend:all_words' %}">Слова</a></li>
+            <li><a class="dropdown-item" href="{% url 'frontend:user_favorites'%}">Избранные слова</a></li>
         </ul>
     </li>
     {% else %}

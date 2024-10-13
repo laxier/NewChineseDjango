@@ -4,6 +4,7 @@ File: templates/includes/pagination.html
 
 {% load my_template_tags %}
 
+{% if page_obj.paginator.num_pages > 1 %}
 <div class="pagination-container">
     <nav aria-label="Page navigation">
         <ul class="pagination">
@@ -61,3 +62,4 @@ File: templates/includes/pagination.html
         </ul>
     </nav>
 </div>
+{% endif %}

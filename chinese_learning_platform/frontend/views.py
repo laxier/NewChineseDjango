@@ -316,15 +316,31 @@ def translate_to_russian(review_period=None, hsk_levels=None):
     return translated_period, translated_levels
 
 
-class UserFavoritesView(LoginRequiredMixin, CurrentUserMixin, ListView):
+from django.db.models import Count, F, FloatField, ExpressionWrapper, OuterRef, Subquery
+
+
+class UserFavoritesView(LoginRequiredMixin, CurrentUserMixin, WordFilteringMixin, ListView, WordPaginationMixin):
     model = ChineseWord
     template_name = 'user_favorites.html'
     context_object_name = 'favorites'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_form'] = WordSearchForm(self.request.GET)  # Keep user search input
+        context['review_period'] = self.request.GET.get('review_period', '')
+        return context
+
     def get_queryset(self):
         # Return the user's favorite words with their performance
         queryset = self.request.user.favorite_words.all()
-        return self.prefetch_user_performance(queryset)
+        queryset = self.prefetch_user_performance(queryset)
+
+        # Apply filtering
+        queryset = self.apply_hsk_level_filter(queryset)
+        queryset = self.apply_search_filter(queryset)
+        queryset = self.apply_sorting(queryset)
+
+        return queryset
 
     def prefetch_user_performance(self, queryset):
         """Prefetch the user's performance on words."""
@@ -333,3 +349,60 @@ class UserFavoritesView(LoginRequiredMixin, CurrentUserMixin, ListView):
                      queryset=WordPerformance.objects.filter(user=self.request.user),
                      to_attr='user_performance')  # Store the prefetched data in 'user_performance'
         )
+    def apply_sorting(self, queryset):
+        """Applies sorting based on query parameters."""
+        sort_by = self.request.GET.get('sort_by', 'accuracy_percentage')
+        sort_order = self.request.GET.get('sort_order', 'acs')
+
+        # Get the related WordPerformance and calculate accuracy
+        right_count = Subquery(
+            WordPerformance.objects.filter(word=OuterRef('pk'), user=self.request.user)
+            .values('right')[:1]  # Gets the first value for right
+        )
+
+        wrong_count = Subquery(
+            WordPerformance.objects.filter(word=OuterRef('pk'), user=self.request.user)
+            .values('wrong')[:1]  # Gets the first value for wrong
+        )
+
+        queryset = queryset.annotate(
+            right_count=right_count,
+            wrong_count=wrong_count,
+            accuracy_percentage=(F('right_count') * 100.0) / (F('right_count') + F('wrong_count'))
+            # Direct calculation
+        )
+
+        if sort_by == 'accuracy_percentage':
+            return queryset.order_by(sort_order == 'asc' and 'accuracy_percentage' or '-accuracy_percentage')
+
+        if sort_by == 'next_review_date':
+            queryset = queryset.annotate(
+                next_review_date=Subquery(
+                    WordPerformance.objects.filter(word=OuterRef('pk'), user=self.request.user)
+                    .values('next_review_date')[:1]  # Replace 'next_review_date' with actual field name
+                )
+            )
+            return queryset.order_by(sort_order == 'asc' and 'next_review_date' or '-next_review_date')
+
+        return queryset.order_by(sort_order == 'asc' and sort_by or f'-{sort_by}')
+
+    def apply_hsk_level_filter(self, queryset):
+        """Applies filtering based on HSK levels."""
+        hsk_levels = self.request.GET.getlist('hsk_levels')  # Get list of HSK levels
+        if hsk_levels:
+            queryset = queryset.filter(hsk_level__in=hsk_levels)  # Directly filter on hsk_level
+        return queryset
+
+    def apply_search_filter(self, queryset):
+        """Apply the search filter if a search query is provided."""
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(simplified__icontains=search_query) |  # Assuming `chinese_word` is the related name
+                Q(traditional__icontains=search_query) |
+                Q(pinyin__icontains=search_query) |
+                Q(meaning__icontains=search_query)
+            )
+        return queryset
+
+

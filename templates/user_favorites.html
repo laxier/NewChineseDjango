@@ -6,6 +6,7 @@
 {% block content %}
 <div class="container">
     <h1>Мои Избранные Слова</h1>
+    {% include 'includes/user_favorites_search_form.html' %}
     <div class="table-container">
         <div class="table-row heading">
             <div class="row-item">Слово</div>
@@ -56,6 +57,8 @@
         {% endfor %}
     </div>
 </div>
+
+{% include 'includes/pagination.html' with page_obj=favorites %}
 {% endblock %}
 
 {% block scripts %}
