@@ -4,9 +4,14 @@
         <div class="row-item">Произношение</div>
         <div class="row-item">Перевод</div>
         <div class="row-item">Статистика</div>
+        {% if '/user-words/' in request.path%}
+        <div class="row-item percent-header" onclick="sortTable('accuracy_percentage')">Процент</div>
+        <div class="row-item date-header" onclick="sortTable('next_review_date')">Повторение</div>
+        {% else %}
         <div class="row-item percent-header">Процент</div>
         {% if '/deck/' in request.path or '/user-words/' in request.path %}
         <div class="row-item date-header">Повторение</div>
+        {% endif %}
         {% endif %}
     </div>
     {% for performance in performances %}
