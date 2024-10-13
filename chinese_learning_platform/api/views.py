@@ -159,3 +159,19 @@ class AddWordToMindMapView(APIView):
                 child_word_in_map.save()
             except Exception as e:
                 raise Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+from wordpages.models import Sentence
+from .serializers import SentenceSerializer
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import generics
+
+
+class SentenceListCreateView(generics.ListCreateAPIView):
+    queryset = Sentence.objects.all()
+    serializer_class = SentenceSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class SentenceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Sentence.objects.all()
+    serializer_class = SentenceSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
