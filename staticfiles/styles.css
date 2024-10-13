@@ -16,6 +16,11 @@
     padding-right: 1rem;
 }
 
+.row {
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
 header {
     background-color: white;
 }
@@ -407,8 +412,8 @@ main {
 
 
 .dark-theme .header {
-    border-bottom: 1px solid var(--black-border);
-    /*border-bottom: var(--black-border);*/
+    /*border-bottom: 1px solid var(--black-border);*/
+    border-bottom: var(--black-border);
 }
 
 .dark-theme .dropdown-menu {
@@ -782,6 +787,11 @@ main {
     }
 }
 
+@media (max-width: 426px) {
+    .row {
+        flex-direction: column;!important;
+    }
+}
 @media (max-width: 400px) {
     .form-check-label {
         white-space: normal;

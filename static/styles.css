@@ -412,8 +412,8 @@ main {
 
 
 .dark-theme .header {
-    border-bottom: 1px solid var(--black-border);
-    /*border-bottom: var(--black-border);*/
+    /*border-bottom: 1px solid var(--black-border);*/
+    border-bottom: var(--black-border);
 }
 
 .dark-theme .dropdown-menu {

@@ -3,6 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <head>
     {% load static %}
+    <script src="{% static 'theme.js' %}"></script>
+    <script src="{% static 'scroll.js' %}"></script>
     {% if title %}
     <title>{{ title }} - 汉语中心</title>
     {% else %}
@@ -34,7 +36,7 @@
     </div>
     {% endif %}
     {% block content %}{% endblock %}
-</div>
+    </div>
 </main>
 {% include 'includes/order_modal.html' %}
 
@@ -44,10 +46,16 @@
     </div>
 </footer>
 <script src="https://cdn.rawgit.com/xylo/hanzi-writer/v3.0.0/dist/hanziwriter.min.js"></script>
-<script src="{% static 'theme.js' %}"></script>
-<script src="{% static 'scroll.js' %}"></script>
 <script>
-const isAuthenticated = {% if current_user.is_authenticated %}    true;{% else %}    false;{% endif %}
+    const isAuthenticated = { %
+    if current_user.is_authenticated %}
+    true;
+    {% else %
+    }
+    false;
+    {%
+        endif %
+    }
 </script>
 <script src="{% static 'accuracy.js' %}"></script>
 </body>
