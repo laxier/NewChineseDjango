@@ -22,6 +22,7 @@ class CurrentUserMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['current_user'] = self.request.user
+        context['now'] = timezone.now()
         return context
 
 
@@ -243,7 +244,6 @@ class UserWordsView(LoginRequiredMixin, CurrentUserMixin, WordFilteringMixin, Wo
         context = super().get_context_data(**kwargs)
         context['search_form'] = SearchForm(self.request.GET)
         context['review_period'] = self.request.GET.get('review_period', '')
-        context['now'] = timezone.now()
         total_performances_count = self.get_queryset().count()
         context['total_performances_count'] = total_performances_count
         return context
@@ -267,7 +267,6 @@ class ReviewWordsView(CurrentUserMixin, WordFilteringMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['now'] = timezone.now()
         review_period = self.request.GET.get('review_period', '')
         hsk_levels = self.request.GET.getlist('hsk_levels')
 
@@ -315,3 +314,22 @@ def translate_to_russian(review_period=None, hsk_levels=None):
     translated_levels = [hsk_level_mapping.get(level, level) for level in hsk_levels] if hsk_levels else []
 
     return translated_period, translated_levels
+
+
+class UserFavoritesView(LoginRequiredMixin, CurrentUserMixin, ListView):
+    model = ChineseWord
+    template_name = 'user_favorites.html'
+    context_object_name = 'favorites'
+
+    def get_queryset(self):
+        # Return the user's favorite words with their performance
+        queryset = self.request.user.favorite_words.all()
+        return self.prefetch_user_performance(queryset)
+
+    def prefetch_user_performance(self, queryset):
+        """Prefetch the user's performance on words."""
+        return queryset.prefetch_related(
+            Prefetch('performance',
+                     queryset=WordPerformance.objects.filter(user=self.request.user),
+                     to_attr='user_performance')  # Store the prefetched data in 'user_performance'
+        )

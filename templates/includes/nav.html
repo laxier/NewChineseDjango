@@ -13,11 +13,12 @@
             Слова
         </a>
         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="{% url 'frontend:user-words'%}">Мои Слова</a></li>
-            <li><a class="dropdown-item" href="{% url 'frontend:all-words' %}">Слова</a></li>
+            <li><a class="dropdown-item" href="{% url 'frontend:user_favorites'%}">Любимые слова</a></li>
+            <li><a class="dropdown-item" href="{% url 'frontend:user_words'%}">Слова изученные</a></li>
+            <li><a class="dropdown-item" href="{% url 'frontend:all_words' %}">Слова</a></li>
         </ul>
     </li>
     {% else %}
-    <li><a href="{% url 'frontend:all-words' %}" class="nav-link px-2 link-dark">Слова</a></li>
+    <li><a href="{% url 'frontend:all_words' %}" class="nav-link px-2 link-dark">Слова</a></li>
     {% endif %}
 </ul>

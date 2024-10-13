@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Мои Избранные Слова{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="display-4">Мои Избранные Слова</h1>
+    <div class="table-container">
+        <div class="table-row heading">
+            <div class="row-item">Слово</div>
+            <div class="row-item">Произношение</div>
+            <div class="row-item">Перевод</div>
+            <div class="row-item">Статистика</div>
+            <div class="row-item percent-header">Процент</div>
+            <div class="row-item date-header">Повторение</div>
+            <div class="row-item action-header">Действие</div>
+        </div>
+
+        {% for word in favorites %}
+        <div class="table-row">
+            <div class="row-item">
+                <div class="chinese"
+                     data-id="{{ word.id }}"
+                     data-pinyin="{{ word.pinyin }}"
+                     data-meaning="{{ word.meaning }}">
+                    {{ word.simplified }}
+                </div>
+            </div>
+            <div class="row-item">{{ word.pinyin }}</div>
+            <div class="row-item">{{ word.meaning }}</div>
+            {% with performance=word.user_performance.0 %}
+            {% if performance %}
+            <div class="row-item">{{ performance }}</div>
+            <div class="row-item percent">{{ performance.accuracy_percentage_display }}%</div>
+            <div class="row-item">
+                {% if performance.next_review_date < now %}
+                {{ performance.next_review_date|timesince }} ago
+                {% else %}
+                in {{ performance.next_review_date|timeuntil }}
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="row-item">-</div>
+            <div class="row-item">-</div>
+            {% endif %}
+            {% endwith %}
+            <div class="row-item">
+                <button class="btn btn-danger" onclick="toggleFavorite({{ word.id }})">Unfavorite</button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="table-row">
+            <div class="row-item" colspan="6">Нет избранных слов.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleFavorite(wordId) {
+        fetch(`/api/v1/words/${wordId}/favorite/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+        })
+            .then(response => {
+                if (response.ok) {
+                    const item = document.getElementById(`word-${wordId}`);
+                    item.remove();
+                } else {
+                    console.error('Error toggling favorite:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+{% endblock %}
