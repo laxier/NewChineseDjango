@@ -1,104 +1,192 @@
+<!-- Make sure to include Bootstrap CSS and JS in your base template or add them here -->
+<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+
+<style>
+    .modal-dialog-centered {
+        display: flex;
+        align-items: center;
+        min-height: calc(100% - 1rem);
+    }
+
+    @media (min-width: 576px) {
+        .modal-dialog-centered {
+            min-height: calc(100% - 3.5rem);
+        }
+    }
+</style>
+
 <h2>Sentences</h2>
-<ul id="sentences-list">
+<ul id="sentences-list" class="list-group">
     {% for sentence in sentences %}
-    <li id="sentence-{{ sentence.id }}">
-        {{ sentence.content }} : {{ sentence.meaning }}
-        <button onclick="openSentencePopup({{ sentence.id }}, '{{ sentence.content|escapejs }}', '{{ sentence.meaning|escapejs }}')">Edit</button>
+    <li id="sentence-{{ sentence.id }}" class="list-group-item d-flex justify-content-between align-items-center">
+        <span>{{ sentence.content }} : {{ sentence.meaning }}</span>
+        <div>
+            <button class="btn btn-sm btn-primary"
+                    onclick="openSentencePopup('{{ sentence.id }}', '{{ sentence.content|escapejs }}', '{{ sentence.meaning|escapejs }}')">
+                Edit
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="openDeleteConfirmation('{{ sentence.id }}')">Delete</button>
+        </div>
     </li>
     {% empty %}
-    <li>No sentences available.</li>
+    <li class="list-group-item">No sentences available.</li>
     {% endfor %}
 </ul>
 
-<button onclick="openAddSentencePopup()">Add Sentence</button>
+<button class="btn btn-success mt-3" onclick="openAddSentencePopup()">Add Sentence</button>
 
 <!-- Add/Edit Sentence Modal -->
-<div id="sentence-popup" style="display:none;">
-    <h3 id="popup-title">Add Sentence</h3>
-    <form id="sentence-form">
-        <input type="hidden" id="sentence-id" value="">
-        <label for="sentence-content">Content:</label>
-        <input type="text" id="sentence-content" required>
-        <br>
-        <label for="sentence-meaning">Meaning:</label>
-        <input type="text" id="sentence-meaning">
-        <br>
-        <input type="hidden" id="chinese-word-id" value="{{ chinese_word.id }}"> <!-- Hidden field for Chinese Word ID -->
-        <br>
-        <button type="submit">Save</button>
-        <button type="button" onclick="closeSentencePopup()">Cancel</button>
-    </form>
+<div class="modal fade" id="sentenceModal" tabindex="-1" aria-labelledby="sentenceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sentenceModalLabel">Add Sentence</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sentence-form">
+                    <input type="hidden" id="sentence-id" value="">
+                    <div class="mb-3">
+                        <label for="sentence-content" class="form-label">Content:</label>
+                        <input type="text" class="form-control" id="sentence-content" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sentence-meaning" class="form-label">Meaning:</label>
+                        <input type="text" class="form-control" id="sentence-meaning">
+                    </div>
+                    <input type="hidden" id="chinese-word-id" value="{{ chinese_word.id }}">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitSentenceForm()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this sentence?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // Function to open the Add Sentence Popup
-    function openAddSentencePopup() {
-        document.getElementById('sentence-popup').style.display = 'block';
-        document.getElementById('popup-title').innerText = 'Add Sentence';
-        document.getElementById('sentence-form').reset();
-        document.getElementById('sentence-id').value = ''; // Reset hidden input
-        document.getElementById('chinese-word-id').value = '{{ chinese_word.id }}'; // Set Chinese Word ID
+    let currentDeleteId = null;
+    const sentenceModal = new bootstrap.Modal(document.getElementById('sentenceModal'));
+    const deleteConfirmationModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
-    // Function to open the Edit Sentence Popup
+    function openAddSentencePopup() {
+        document.getElementById('sentenceModalLabel').innerText = 'Add Sentence';
+        document.getElementById('sentence-form').reset();
+        document.getElementById('sentence-id').value = '';
+        document.getElementById('chinese-word-id').value = '{{ chinese_word.id }}';
+        sentenceModal.show();
+    }
+
     function openSentencePopup(id, content, meaning) {
-        document.getElementById('sentence-popup').style.display = 'block';
-        document.getElementById('popup-title').innerText = 'Edit Sentence';
+        document.getElementById('sentenceModalLabel').innerText = 'Edit Sentence';
         document.getElementById('sentence-content').value = content;
         document.getElementById('sentence-meaning').value = meaning;
-        document.getElementById('sentence-id').value = id; // Set hidden input
-        document.getElementById('chinese-word-id').value = '{{ chinese_word.id }}'; // Set Chinese Word ID for editing
+        document.getElementById('sentence-id').value = id;
+        document.getElementById('chinese-word-id').value = '{{ chinese_word.id }}';
+        sentenceModal.show();
     }
 
-    // Function to close the popup
-    function closeSentencePopup() {
-        document.getElementById('sentence-popup').style.display = 'none';
+    function openDeleteConfirmation(id) {
+        currentDeleteId = id;
+        deleteConfirmationModal.show();
     }
 
-    // Handle the form submission
-    document.getElementById('sentence-form').addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
+    function confirmDelete() {
+        if (currentDeleteId) {
+            deleteSentence(currentDeleteId);
+            deleteConfirmationModal.hide();
+        }
+    }
+
+    function deleteSentence(id) {
+        fetch(`/api/v1/sentences/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    const sentenceItem = document.getElementById('sentence-' + id);
+                    sentenceItem.remove();
+                } else {
+                    throw new Error('Failed to delete sentence');
+                }
+            })
+            .catch(error => console.error('Error deleting sentence:', error));
+    }
+
+    function submitSentenceForm() {
         const id = document.getElementById('sentence-id').value;
         const content = document.getElementById('sentence-content').value;
         const meaning = document.getElementById('sentence-meaning').value;
-        const chineseWordId = document.getElementById('chinese-word-id').value; // Get Chinese Word ID
+        const chineseWordId = document.getElementById('chinese-word-id').value;
 
-        if (id) {
-            // Updating existing sentence
-            fetch(`/api/v1/sentences/${id}/`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}' // Add CSRF token for security
-                },
-                body: JSON.stringify({ content, meaning, chinese_word_id: chineseWordId }) // Include Chinese word ID
-            })
+        const url = id ? `/api/v1/sentences/${id}/` : '/api/v1/sentences/';
+        const method = id ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({content, meaning, chinese_word_id: chineseWordId})
+        })
             .then(response => response.json())
             .then(data => {
-                const sentenceItem = document.getElementById('sentence-' + id);
-                sentenceItem.innerHTML = `${data.content} : ${data.meaning} <button onclick="openSentencePopup(${data.id}, '${data.content|escapejs}', '${data.meaning|escapejs}')">Edit</button>`;
-                closeSentencePopup();
+                const sentenceItem = document.getElementById('sentence-' + data.id);
+                const safeContent = escapeHtml(data.content);
+                const safeMeaning = escapeHtml(data.meaning);
+                const html = `
+                <span>${safeContent} : ${safeMeaning}</span>
+                <div>
+                    <button class="btn btn-sm btn-primary" onclick="openSentencePopup('${data.id}', '${escapeHtml(data.content)}', '${escapeHtml(data.meaning)}')">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="openDeleteConfirmation('${data.id}')">Delete</button>
+                </div>`;
+
+                if (sentenceItem) {
+                    sentenceItem.innerHTML = html;
+                } else {
+                    const newSentenceItem = document.createElement('li');
+                    newSentenceItem.id = 'sentence-' + data.id;
+                    newSentenceItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    newSentenceItem.innerHTML = html;
+                    document.getElementById('sentences-list').appendChild(newSentenceItem);
+                }
+                sentenceModal.hide();
             })
-            .catch(error => console.error('Error updating sentence:', error));
-        } else {
-            // Creating new sentence
-            fetch(`/api/v1/sentences/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}' // Add CSRF token for security
-                },
-                body: JSON.stringify({ content, meaning, chinese_word_id: chineseWordId }) // Include Chinese word ID
-            })
-            .then(response => response.json())
-            .then(data => {
-                const newSentenceItem = document.createElement('li');
-                newSentenceItem.id = 'sentence-' + data.id;
-                newSentenceItem.innerHTML = `${data.content} : ${data.meaning} <button onclick="openSentencePopup(${data.id}, '${data.content|escapejs}', '${data.meaning|escapejs}')">Edit</button>`;
-                document.getElementById('sentences-list').appendChild(newSentenceItem);
-                closeSentencePopup();
-            })
-            .catch(error => console.error('Error creating sentence:', error));
-        }
-    });
+            .catch(error => console.error('Error updating/creating sentence:', error));
+    }
 </script>

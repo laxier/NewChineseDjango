@@ -4,15 +4,23 @@
 {% block title %}{{ chinese_word.simplified }} Details{% endblock %}
 
 {% block content %}
-    <h1>{{ chinese_word.simplified }}</h1>
-    <p>Pinyin: {{ chinese_word.pinyin }}</p>
-    <p>Meaning: {{ chinese_word.meaning }}</p>
-    <p>HSK: {{ chinese_word.hsk_level }}</p>
+<div class="container">
+    <h1 class="display-4">{{ chinese_word.simplified }}</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p>Pinyin: <strong>{{ chinese_word.pinyin }}</strong></p>
+            <p>Meaning: <strong>{{ chinese_word.meaning }}</strong></p>
+            <p>HSK Level: <strong>{{ chinese_word.hsk_level }}</strong></p>
+        </div>
+    </div>
 
-    <h2>Stroke Order</h2>
-    <div id="stroke-order-container"></div>
+    <h2 class="mt-4">Stroke Order</h2>
+    <div id="stroke-order-container" class="d-flex flex-wrap mb-4"></div>
+
     {% include 'wordpages/includes/sentences_list.html' %}
+
     {% include 'wordpages/includes/related_words_list.html' %}
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -73,6 +81,8 @@
         characters.split('').forEach((char) => {
             HanziWriter.loadCharacterData(char).then(function (charData) {
                 const target = document.createElement('div');
+                target.classList.add('stroke-container'); // Optional: Add a class for custom styles
+                target.style.marginRight = '10px'; // Optional: Additional styling
                 container.appendChild(target);
 
                 for (var i = 0; i < charData.strokes.length; i++) {
