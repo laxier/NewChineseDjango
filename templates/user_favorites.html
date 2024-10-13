@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="display-4">Мои Избранные Слова</h1>
+    <h1>Мои Избранные Слова</h1>
     <div class="table-container">
         <div class="table-row heading">
             <div class="row-item">Слово</div>
@@ -18,7 +18,7 @@
         </div>
 
         {% for word in favorites %}
-        <div class="table-row">
+        <div class="table-row" id="word-{{ word.id }}">
             <div class="row-item">
                 <div class="chinese"
                      data-id="{{ word.id }}"
@@ -71,7 +71,7 @@
             .then(response => {
                 if (response.ok) {
                     const item = document.getElementById(`word-${wordId}`);
-                    item.remove();
+                    item.remove(); // Remove the word from the list
                 } else {
                     console.error('Error toggling favorite:', response.statusText);
                 }

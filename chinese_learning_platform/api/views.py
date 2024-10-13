@@ -186,3 +186,13 @@ class ChineseWordFavoriteView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         serializer.update(serializer.instance, {'user': self.request.user})
+
+class ChineseWordFavoriteStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, word_id):
+        try:
+            word = ChineseWord.objects.get(id=word_id)
+            is_favorite = request.user in word.favorites.all()
+            return Response({'is_favorite': is_favorite})
+        except ChineseWord.DoesNotExist:
+            return Response({'error': 'Word not found'}, status=404)

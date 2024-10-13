@@ -12,13 +12,17 @@
                 <div id="hanzi-writer" style="display: flex; flex-direction: row; flex-wrap: nowrap;"></div>
                 <div id="modalPinyin"></div>
                 <div id="modalMeaning"></div>
-                <!-- Button to redirect to the Chinese word detail page -->
-                <a href="#" id="modalDetailLink" class="btn btn-primary" style="margin-top: 10px;">Go to Word Page</a>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                    <a href="#" id="modalDetailLink" class="btn btn-primary">Go to Word Page</a>
+                    <button id="favorite-button" class="btn btn-danger" onclick="toggleFavorite(currentWordId)"
+                            data-favorite-status="false">
+                        <!-- Button text will be set dynamically -->
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 {% block scripts %}
 <script>
     function initializeChineseClickEvents() {
@@ -28,6 +32,7 @@
             element.addEventListener('click', () => showModal(element));
         });
     }
+
     initializeChineseClickEvents()
 </script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer/dist/hanzi-writer.min.js"></script>

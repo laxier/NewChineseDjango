@@ -22,20 +22,22 @@
     <li id="sentence-{{ sentence.id }}" class="list-group-item d-flex justify-content-between align-items-center">
         <span>{{ sentence.content }} : {{ sentence.meaning }}</span>
         <div>
+            {% if current_user.is_authenticated %}
             <button class="btn btn-sm btn-primary"
                     onclick="openSentencePopup('{{ sentence.id }}', '{{ sentence.content|escapejs }}', '{{ sentence.meaning|escapejs }}')">
                 Edit
             </button>
             <button class="btn btn-sm btn-danger" onclick="openDeleteConfirmation('{{ sentence.id }}')">Delete</button>
+            {% endif %}
         </div>
     </li>
     {% empty %}
     <li class="list-group-item">No sentences available.</li>
     {% endfor %}
 </ul>
-
+{% if current_user.is_authenticated %}
 <button class="btn btn-success mt-3" onclick="openAddSentencePopup()">Add Sentence</button>
-
+{% endif %}
 <!-- Add/Edit Sentence Modal -->
 <div class="modal fade" id="sentenceModal" tabindex="-1" aria-labelledby="sentenceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

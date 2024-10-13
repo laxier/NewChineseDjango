@@ -7,13 +7,19 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="display-4">{{ chinese_word.simplified }}</h1>
-        <button id="favorite-button" class="btn btn-primary" onclick="toggleFavorite()">
+        {% if user.is_authenticated %}
+        <button id="favorite-button" class="btn {% if user in chinese_word.favorites.all %}btn-secondary{% else %}btn-danger{% endif %}" onclick="toggleFavorite()">
             {% if user in chinese_word.favorites.all %}
             Unfavorite
             {% else %}
             Favorite
             {% endif %}
         </button>
+        {% else %}
+        <button id="favorite-button" class="btn btn-secondary" disabled>
+            Please log in to favorite
+        </button>
+        {% endif %}
     </div>
     <div class="card mb-4">
         <div class="card-body">
@@ -27,7 +33,6 @@
     <div id="stroke-order-container" class="d-flex flex-wrap mb-4"></div>
 
     {% include 'wordpages/includes/sentences_list.html' %}
-
     {% include 'wordpages/includes/related_words_list.html' %}
 </div>
 {% endblock %}
@@ -126,8 +131,16 @@
         })
             .then(response => {
                 if (response.ok) {
-                    // Toggle button text based on current state
-                    button.innerText = button.innerText === 'Favorite' ? 'Unfavorite' : 'Favorite';
+                    // Toggle button text and class based on current state
+                    if (button.innerText === 'Favorite') {
+                        button.innerText = 'Unfavorite';
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-secondary'); // Grey button for unfavorite
+                    } else {
+                        button.innerText = 'Favorite';
+                        button.classList.remove('btn-secondary');
+                        button.classList.add('btn-danger'); // Red button for favorite
+                    }
                 } else {
                     console.error('Error toggling favorite:', response.statusText);
                 }
