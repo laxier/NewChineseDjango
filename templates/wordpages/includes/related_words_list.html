@@ -1,0 +1,10 @@
+{% if related_words %}
+<h2>Related Words</h2>
+<ul>
+    {% for related_word in related_words %}
+    <li>{{ related_word.related_word.simplified }}</li>
+    {% empty %}
+    <li>No related words available.</li>
+    {% endfor %}
+</ul>
+{% endif %}

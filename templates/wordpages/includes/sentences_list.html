@@ -1,0 +1,104 @@
+<h2>Sentences</h2>
+<ul id="sentences-list">
+    {% for sentence in sentences %}
+    <li id="sentence-{{ sentence.id }}">
+        {{ sentence.content }} : {{ sentence.meaning }}
+        <button onclick="openSentencePopup({{ sentence.id }}, '{{ sentence.content|escapejs }}', '{{ sentence.meaning|escapejs }}')">Edit</button>
+    </li>
+    {% empty %}
+    <li>No sentences available.</li>
+    {% endfor %}
+</ul>
+
+<button onclick="openAddSentencePopup()">Add Sentence</button>
+
+<!-- Add/Edit Sentence Modal -->
+<div id="sentence-popup" style="display:none;">
+    <h3 id="popup-title">Add Sentence</h3>
+    <form id="sentence-form">
+        <input type="hidden" id="sentence-id" value="">
+        <label for="sentence-content">Content:</label>
+        <input type="text" id="sentence-content" required>
+        <br>
+        <label for="sentence-meaning">Meaning:</label>
+        <input type="text" id="sentence-meaning">
+        <br>
+        <input type="hidden" id="chinese-word-id" value="{{ chinese_word.id }}"> <!-- Hidden field for Chinese Word ID -->
+        <br>
+        <button type="submit">Save</button>
+        <button type="button" onclick="closeSentencePopup()">Cancel</button>
+    </form>
+</div>
+
+<script>
+    // Function to open the Add Sentence Popup
+    function openAddSentencePopup() {
+        document.getElementById('sentence-popup').style.display = 'block';
+        document.getElementById('popup-title').innerText = 'Add Sentence';
+        document.getElementById('sentence-form').reset();
+        document.getElementById('sentence-id').value = ''; // Reset hidden input
+        document.getElementById('chinese-word-id').value = '{{ chinese_word.id }}'; // Set Chinese Word ID
+    }
+
+    // Function to open the Edit Sentence Popup
+    function openSentencePopup(id, content, meaning) {
+        document.getElementById('sentence-popup').style.display = 'block';
+        document.getElementById('popup-title').innerText = 'Edit Sentence';
+        document.getElementById('sentence-content').value = content;
+        document.getElementById('sentence-meaning').value = meaning;
+        document.getElementById('sentence-id').value = id; // Set hidden input
+        document.getElementById('chinese-word-id').value = '{{ chinese_word.id }}'; // Set Chinese Word ID for editing
+    }
+
+    // Function to close the popup
+    function closeSentencePopup() {
+        document.getElementById('sentence-popup').style.display = 'none';
+    }
+
+    // Handle the form submission
+    document.getElementById('sentence-form').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+        const id = document.getElementById('sentence-id').value;
+        const content = document.getElementById('sentence-content').value;
+        const meaning = document.getElementById('sentence-meaning').value;
+        const chineseWordId = document.getElementById('chinese-word-id').value; // Get Chinese Word ID
+
+        if (id) {
+            // Updating existing sentence
+            fetch(`/api/v1/sentences/${id}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' // Add CSRF token for security
+                },
+                body: JSON.stringify({ content, meaning, chinese_word_id: chineseWordId }) // Include Chinese word ID
+            })
+            .then(response => response.json())
+            .then(data => {
+                const sentenceItem = document.getElementById('sentence-' + id);
+                sentenceItem.innerHTML = `${data.content} : ${data.meaning} <button onclick="openSentencePopup(${data.id}, '${data.content|escapejs}', '${data.meaning|escapejs}')">Edit</button>`;
+                closeSentencePopup();
+            })
+            .catch(error => console.error('Error updating sentence:', error));
+        } else {
+            // Creating new sentence
+            fetch(`/api/v1/sentences/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' // Add CSRF token for security
+                },
+                body: JSON.stringify({ content, meaning, chinese_word_id: chineseWordId }) // Include Chinese word ID
+            })
+            .then(response => response.json())
+            .then(data => {
+                const newSentenceItem = document.createElement('li');
+                newSentenceItem.id = 'sentence-' + data.id;
+                newSentenceItem.innerHTML = `${data.content} : ${data.meaning} <button onclick="openSentencePopup(${data.id}, '${data.content|escapejs}', '${data.meaning|escapejs}')">Edit</button>`;
+                document.getElementById('sentences-list').appendChild(newSentenceItem);
+                closeSentencePopup();
+            })
+            .catch(error => console.error('Error creating sentence:', error));
+        }
+    });
+</script>
