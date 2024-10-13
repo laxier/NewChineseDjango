@@ -5,7 +5,16 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="display-4">{{ chinese_word.simplified }}</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="display-4">{{ chinese_word.simplified }}</h1>
+        <button id="favorite-button" class="btn btn-primary" onclick="toggleFavorite()">
+            {% if user in chinese_word.favorites.all %}
+            Unfavorite
+            {% else %}
+            Favorite
+            {% endif %}
+        </button>
+    </div>
     <div class="card mb-4">
         <div class="card-body">
             <p>Pinyin: <strong>{{ chinese_word.pinyin }}</strong></p>
@@ -101,5 +110,29 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadAndRenderCharacterStrokes(chineseCharacters);
     });
+</script>
+<script>
+    function toggleFavorite() {
+        const wordId = "{{ chinese_word.id }}"; // Assuming you have the word ID available
+        const button = document.getElementById('favorite-button');
+
+        fetch(`/api/v1/words/${wordId}/favorite/`, {
+            method: 'PUT', // Use PUT for update
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for security
+            },
+            body: JSON.stringify({user: "{{ user.id }}"}) // Send user ID in the request
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Toggle button text based on current state
+                    button.innerText = button.innerText === 'Favorite' ? 'Unfavorite' : 'Favorite';
+                } else {
+                    console.error('Error toggling favorite:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error toggling favorite:', error));
+    }
 </script>
 {% endblock %}

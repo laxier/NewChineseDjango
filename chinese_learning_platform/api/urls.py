@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import MindMapViewSet, ChineseWordViewSet, AddWordToMindMapView, DeckPerformanceViewSet, \
-    WordPerformanceViewSet, SentenceListCreateView, SentenceRetrieveUpdateDestroyView
+    WordPerformanceViewSet, SentenceListCreateView, SentenceRetrieveUpdateDestroyView, ChineseWordFavoriteView
 
 router = DefaultRouter()
 router.register(r'mindmaps', MindMapViewSet)
@@ -19,4 +19,6 @@ urlpatterns = [
 
     path('sentences/', SentenceListCreateView.as_view(), name='sentence-list-create'),
     path('sentences/<int:pk>/', SentenceRetrieveUpdateDestroyView.as_view(), name='sentence-detail'),
+
+    path('words/<int:pk>/favorite/', ChineseWordFavoriteView.as_view(), name='word-favorite')
 ]

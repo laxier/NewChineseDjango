@@ -175,3 +175,14 @@ class SentenceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Sentence.objects.all()
     serializer_class = SentenceSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+from .serializers import ChineseWordFavoriteSerializer
+
+class ChineseWordFavoriteView(generics.UpdateAPIView):
+    queryset = ChineseWord.objects.all()
+    serializer_class = ChineseWordFavoriteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_update(self, serializer):
+        serializer.update(serializer.instance, {'user': self.request.user})

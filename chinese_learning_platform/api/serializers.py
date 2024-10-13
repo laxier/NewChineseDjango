@@ -128,3 +128,19 @@ class SentenceSerializer(serializers.ModelSerializer):
         instance.meaning = validated_data.get('meaning', instance.meaning)
         instance.save()
         return instance
+
+class ChineseWordFavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChineseWord
+        fields = ['id', 'favorites']
+
+    def update(self, instance, validated_data):
+        user = validated_data.pop('user')  # Get the user from the request
+
+        if user in instance.favorites.all():
+            instance.favorites.remove(user)  # Remove if already favorited
+        else:
+            instance.favorites.add(user)  # Add to favorites
+
+        instance.save()
+        return instance

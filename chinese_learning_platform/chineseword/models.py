@@ -2,13 +2,16 @@ import requests
 from bs4 import BeautifulSoup
 from django.db import models
 from django.db.models import UniqueConstraint
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 class ChineseWord(models.Model):
     simplified = models.CharField(max_length=50)
     traditional = models.CharField(max_length=50, blank=True, null=True)
     pinyin = models.CharField(max_length=100, blank=True, null=True)
     meaning = models.TextField(blank=True, null=True)
     hsk_level = models.CharField(null=True, blank=True, max_length=10)
+    favorites = models.ManyToManyField(User, related_name='favorite_words', blank=True)
 
     class Meta:
         constraints = [
@@ -43,3 +46,4 @@ def searchWord(word):
             meaning = cells[2].text.replace("\"", "").strip()
             return pinyin, meaning
     return None, None
+
