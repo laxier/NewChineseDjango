@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Homework{% endblock %}
+
+{% block content %}
+<h1>Add Homework</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+<a href="{% url 'lesson_list' %}" class="btn btn-secondary">Cancel</a>
+{% endblock %}

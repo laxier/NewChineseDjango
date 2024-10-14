@@ -17,8 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
-from debug_toolbar.toolbar import debug_toolbar_urls
 from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
@@ -27,7 +27,8 @@ urlpatterns = [
     path('', include('frontend.urls')),
     path('word/', include('wordpages.urls')),
     path('accounts/', include('users.urls')),
-]
+    path('lessons/', include('lessons.urls')),
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:  # Ensure to import settings if not already done
     urlpatterns += [

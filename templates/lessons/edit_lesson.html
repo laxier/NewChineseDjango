@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Lesson{% endblock %}
+
+{% block content %}
+<h1>Edit Lesson: {{ form.instance.title }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
+<a href="{% url 'lesson_list' %}" class="btn btn-secondary">Cancel</a>
+{% endblock %}
