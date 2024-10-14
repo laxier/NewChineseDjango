@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Edit Lexical Exercise{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2>Edit Lexical Exercise</h2>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a href="{% url 'lessons:lesson_detail' lexical_exercise.lesson.id %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+{% endblock %}
