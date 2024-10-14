@@ -67,7 +67,10 @@ class LessonDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['reading_texts'] = self.object.reading_texts.all()
-        context['new_words'] = self.object.words.all()
+        context['primary_words'] = self.object.words.all()
+        context['supplementary_words']=self.object.supplementary_words.all()
+        context['understanding_words'] = self.object.words_for_understanding.all()
+
         context['decks'] = self.object.decks.all()
         context['homeworks'] = self.object.homeworks.all()
         exercises = self.object.lexical_exercises.all()

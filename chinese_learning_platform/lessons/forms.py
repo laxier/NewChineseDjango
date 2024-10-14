@@ -6,10 +6,12 @@ from users.models import Deck
 class LessonForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ['title', 'description', 'decks', 'words']
+        fields = ['title', 'description', 'decks', 'words', 'supplementary_words', 'words_for_understanding']
         widgets = {
             'decks': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-decks'}),
             'words': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-words'}),
+            'supplementary_words': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-supplementary_words'}),
+            'words_for_understanding': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-words_for_understanding'}),
         }
 
     def __init__(self, *args, **kwargs):

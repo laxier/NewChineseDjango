@@ -17,13 +17,34 @@
     <!-- Reading Texts Section -->
     {% include 'lessons/includes/reading_texts.html' with reading_texts=reading_texts %}
 
-    <!-- New Words Section -->
-    <h2>New Words</h2>
+    {% if primary_words %}
+    <h2>Primary Words</h2>
     <ul>
-        {% for word in new_words %}
+        {% for word in primary_words %}
         <li>{{ word.simplified }} ({{ word.pinyin }}): {{ word.meaning }}</li>
         {% endfor %}
     </ul>
+    {% endif %}
+
+    {% if supplementary_words %}
+    <!-- Supplementary Words Section -->
+    <h2>Supplementary Words</h2>
+    <ul>
+        {% for word in supplementary_words %}
+        <li>{{ word.simplified }} ({{ word.pinyin }}): {{ word.meaning }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if understanding_words %}
+    <!-- Words for Understanding Section -->
+    <h2>Words for Understanding</h2>
+    <ul>
+        {% for word in understanding_words %}
+        <li>{{ word.simplified }} ({{ word.pinyin }}): {{ word.meaning }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 
     <!-- Lexical Exercises Section -->
     {% include 'lessons/includes/lexical_exercises.html' %}

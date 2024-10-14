@@ -9,6 +9,8 @@ class Lesson(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     decks = models.ManyToManyField(Deck, related_name='decks', blank=True)
     words = models.ManyToManyField(ChineseWord, related_name='lessons', blank=True)
+    supplementary_words = models.ManyToManyField(ChineseWord, related_name='supplementary_lessons', blank=True)
+    words_for_understanding = models.ManyToManyField(ChineseWord, related_name='understanding_lessons', blank=True)
 
     def __str__(self):
         return self.title
