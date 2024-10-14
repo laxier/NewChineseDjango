@@ -1,14 +1,21 @@
 from django import forms
 from .models import Lesson, ReadingText, Homework, LexicalExercise
+from chineseword.models import ChineseWord
+from users.models import Deck
 
 class LessonForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ['title', 'description', 'decks', 'words']  # Поля для создания или редактирования урока
+        fields = ['title', 'description', 'decks', 'words']
         widgets = {
-            'decks': forms.CheckboxSelectMultiple(),  # Многофункциональный виджет для выбора колод
-            'words': forms.CheckboxSelectMultiple(),  # Многофункциональный виджет для выбора слов
+            'decks': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-decks'}),
+            'words': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-words'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['decks'].queryset = Deck.objects.all()
+        self.fields['words'].queryset = ChineseWord.objects.all()
 
 class ReadingTextForm(forms.ModelForm):
     class Meta:
