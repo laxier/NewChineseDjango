@@ -6,125 +6,143 @@
     <title>Lexical Exercises</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .lexical-exercises-container {
-            margin: 20px;
+        .child-exercise, .exercise-container {
+            flex-direction: row;
+            display: flex;
+            justify-content: space-between;
         }
-        .exercise-container {
-            margin-bottom: 20px;
-        }
+
         .audio-player {
             margin-left: 10px;
             width: 80px;
         }
-        .exercise-text {
-            white-space: pre-wrap;
+
+        .audio-container {
+            font-size: 14px;
+            width: 40%;
+            margin: 20px 0;
         }
+
         .navigation-controls {
             display: flex;
             justify-content: space-between;
             margin-top: 10px;
         }
+
+        .chinese-dialogue {
+            text-align: justify;
+            font-size: 26px;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 0;
+            font-family: KaiTi, 'Adobe Kaiti Std', SimSun, MingLiU, PMingLiU, Arial, 'Times New Roman', serif;
+        }
     </style>
 </head>
 <body>
-    <div id="lexical-exercises-container"></div>
-    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<div id="lexical-exercises-container"></div>
+<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+<script type="text/babel">
+    const {useState, useEffect, useRef} = React;
 
-        const LexicalExercises = ({ exercises }) => {
-            const [currentIndex, setCurrentIndex] = useState(0);
-            const mainAudioRef = useRef(null);
-            const childAudioRefs = useRef([]);
+    const LexicalExercises = ({exercises}) => {
+        const [currentIndex, setCurrentIndex] = useState(0);
+        const mainAudioRef = useRef(null);
+        const childAudioRefs = useRef([]);
 
-            const handleNext = () => {
-                if (currentIndex < exercises.length - 1) {
-                    setCurrentIndex(currentIndex + 1);
-                }
-            };
-
-            const handlePrevious = () => {
-                if (currentIndex > 0) {
-                    setCurrentIndex(currentIndex - 1);
-                }
-            };
-
-            useEffect(() => {
-                if (mainAudioRef.current) {
-                    mainAudioRef.current.pause();
-                    mainAudioRef.current.currentTime = 0;
-                    mainAudioRef.current.load();
-                }
-
-                childAudioRefs.current.forEach(ref => {
-                    if (ref) {
-                        ref.pause();
-                        ref.currentTime = 0;
-                        ref.load();
-                    }
-                });
-            }, [currentIndex]);
-
-            const currentExercise = exercises[currentIndex];
-
-            const formatTextWithLineBreaks = (text) => {
-                return text.split(/\r?\n/).map((part, index) => (
-                    <span key={index}>
-                        {part}
-                        <br />
-                    </span>
-                ));
-            };
-
-            return (
-                <div className="lexical-exercises-container">
-                    <h2 className="title">Lexical Exercises</h2>
-
-                    <div className="navigation-controls">
-                        <button className="btn btn-secondary" disabled={currentIndex === 0} onClick={handlePrevious}>← Previous</button>
-                        <button className="btn btn-secondary" disabled={currentIndex === exercises.length - 1} onClick={handleNext}>Next →</button>
-                    </div>
-
-                    <div className="exercise-container">
-                        <p className="chinese-dialogue">{formatTextWithLineBreaks(currentExercise.text)}</p>
-                        <div className="audio-container">
-                            <audio className="audio-player" controls ref={mainAudioRef}>
-                                <source src={currentExercise.audio_file} type="audio/mpeg" />
-                                Your browser does not support the audio element.
-                            </audio>
-                        </div>
-                    </div>
-
-                    {currentExercise.children.length > 0 && (
-                        <div className="child-exercises-container">
-                            {currentExercise.children.map((child, index) => (
-                                <div key={child.id} className="child-exercise">
-                                    <p className="chinese-dialogue">{formatTextWithLineBreaks(child.text)}</p>
-                                    <div className="audio-container">
-                                        <audio className="audio-player" controls ref={el => childAudioRefs.current[index] = el}>
-                                            <source src={child.audio_file} type="audio/mpeg" />
-                                            Your browser does not support the audio element.
-                                        </audio>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            );
+        const handleNext = () => {
+            if (currentIndex < exercises.length - 1) {
+                setCurrentIndex(currentIndex + 1);
+            }
         };
 
-        // Parse the JSON data
-        const exercisesData = {{ lexical_exercises|safe }};
+        const handlePrevious = () => {
+            if (currentIndex > 0) {
+                setCurrentIndex(currentIndex - 1);
+            }
+        };
 
-        // Render the React component
-        ReactDOM.render(
-            <LexicalExercises exercises={exercisesData} />,
-            document.getElementById('lexical-exercises-container')
+        useEffect(() => {
+            if (mainAudioRef.current) {
+                mainAudioRef.current.pause();
+                mainAudioRef.current.currentTime = 0;
+                mainAudioRef.current.load();
+            }
+
+            childAudioRefs.current.forEach(ref => {
+                if (ref) {
+                    ref.pause();
+                    ref.currentTime = 0;
+                    ref.load();
+                }
+            });
+        }, [currentIndex]);
+
+        const currentExercise = exercises[currentIndex];
+
+        const formatTextWithLineBreaks = (text) => {
+            return text.split(/\r?\n/).map((part, index) => (
+                <span key={index}>
+                        {part}
+                    <br/>
+                    </span>
+            ));
+        };
+
+        return (
+            <div className="lexical-exercises-container">
+                <h2 className="title">Lexical Exercises</h2>
+
+                <div className="navigation-controls">
+                    <button className="btn btn-secondary" disabled={currentIndex === 0} onClick={handlePrevious}>←
+                        Previous
+                    </button>
+                    <button className="btn btn-secondary" disabled={currentIndex === exercises.length - 1}
+                            onClick={handleNext}>Next →
+                    </button>
+                </div>
+
+                <div className="exercise-container">
+                    <p className="chinese-dialogue">{formatTextWithLineBreaks(currentExercise.text)}</p>
+                    <div className="audio-container">
+                        <audio className="audio-player" controls ref={mainAudioRef}>
+                            <source src={currentExercise.audio_file} type="audio/mpeg"/>
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                </div>
+
+                {currentExercise.children.length > 0 && (
+                    <div className="child-exercises-container">
+                        {currentExercise.children.map((child, index) => (
+                            <div key={child.id} className="child-exercise">
+                                <p className="chinese-dialogue">{formatTextWithLineBreaks(child.text)}</p>
+                                <div className="audio-container">
+                                    <audio className="audio-player" controls
+                                           ref={el => childAudioRefs.current[index] = el}>
+                                        <source src={child.audio_file} type="audio/mpeg"/>
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         );
-    </script>
+    };
+
+    // Parse the JSON data
+    const exercisesData = {{lexical_exercises | safe}};
+
+    // Render the React component
+    ReactDOM.render(
+        <LexicalExercises exercises={exercisesData}/>,
+        document.getElementById('lexical-exercises-container')
+    );
+</script>
 </body>
 </html>
