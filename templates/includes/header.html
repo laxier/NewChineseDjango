@@ -9,6 +9,20 @@
     </div>
 
     {% include 'includes/nav.html' %}
-
-    {% include 'includes/theme_switch.html' %}
+    <div class="col-md-3 text-end" style="display: flex; flex-direction: row; align-items: center;">
+        {% include 'includes/theme_switch.html' %}
+        {% if request.user.is_anonymous %}
+        <a class="btn btn-outline-primary me-2 {% if '/login/' in request.path %} active {% endif %}"
+           href="{% url 'users:login' %}">Войти</a>
+        <a class="btn btn-outline-primary me-2 {% if '/registration/' in request.path %} active {% endif %}"
+           href="{% url 'users:registration' %}">Регистрация</a>
+        {% else %}
+        <form method="post" action="{% url 'users:logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="nav-link btn btn-link" style="background:none; border:none;">
+                Выйти
+            </button>
+        </form>
+        {% endif %}
+    </div>
 </header>

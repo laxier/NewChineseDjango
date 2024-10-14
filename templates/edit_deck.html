@@ -19,21 +19,22 @@
         </div>
 
         {% for word in current_words %}
-            <div class="table-row">
-                <div class="row-item">{{ word.simplified }}</div>
-                <div class="row-item">{{ word.pinyin }}</div>
-                <div class="row-item">{{ word.meaning }}</div>
-                <div class="row-item">
-                    <input type="checkbox" name="delete_word" value="{{ word.id }}">
-                </div>
+        <div class="table-row">
+            <div class="row-item">{{ word.simplified }}</div>
+            <div class="row-item">{{ word.pinyin }}</div>
+            <div class="row-item">{{ word.meaning }}</div>
+            <div class="row-item">
+                <input type="checkbox" name="delete_word" value="{{ word.id }}">
             </div>
+        </div>
         {% endfor %}
     </div>
 
-    <h2>Add New Words</h2>
-    <label>Simplified:</label>
-    {{ word_form.new_words }}  <!-- Render the field for adding new words -->
-    <small>Enter words separated by commas (optional).</small>
-    <button type="submit">Save Changes</button>
+    <h2 class="mt-4">Add New Words</h2>
+    <div class="form-group row align-items-center container">
+            {{ word_form.new_words }}  <!-- Render the field for adding new words -->
+            <small class="form-text text-muted">Введите слова, разделенные запятыми (опционально).</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>
 {% endblock %}

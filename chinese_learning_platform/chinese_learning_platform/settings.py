@@ -22,11 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = 'django-insecure-=pgv_mp-c3@v9*nxbns34*fc-c_^vrgmx@xmno@&sq4rulxz2q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
-# DEBUG = False
+# DEBUG = True
+# INTERNAL_IPS = [
+#     "127.0.0.1",
+# ]
+DEBUG = False
 
 ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'chinese-on-djang-hahshkj2wkj.amvera.io', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = [
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'wordpages.apps.WordpagesConfig',
     'rest_framework.authtoken',
     'debug_toolbar',
+    'django_bootstrap5',
 ]
 
 DEBUG_TOOLBAR_PANELS = [
@@ -160,3 +161,4 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_REDIRECT_URL = '/'
