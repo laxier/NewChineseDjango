@@ -1,0 +1,16 @@
+<!-- lessons/homework_form.html -->
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block title %}
+    Edit Homework - 汉语中心
+{% endblock %}
+
+{% block content %}
+    <h1>Edit Homework</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form form %}  <!-- Render the form with Bootstrap styling -->
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'lessons:edit_homework' lesson.id homework.id %}" class="btn btn-warning btn-sm">Edit</a>
+    </form>
+{% endblock %}

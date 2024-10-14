@@ -1,0 +1,17 @@
+<!-- lessons/homework_confirm_delete.html -->
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block title %}
+    Delete Homework - 汉语中心
+{% endblock %}
+
+{% block content %}
+    <h1>Are you sure you want to delete this homework?</h1>
+    <p>{{ homework.description }}</p>  <!-- Assuming you have a description field -->
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+        <a href="{% url 'lessons:homework_list' lesson_id=homework.lesson.id %}" class="btn btn-secondary">Cancel</a>  <!-- Link back to the homework list -->
+    </form>
+{% endblock %}

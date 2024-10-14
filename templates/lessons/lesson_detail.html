@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block title %}
+    {{ lesson.title }} - 汉语中心
+{% endblock %}
+
+{% block content %}
+    <h1>{{ lesson.title }}</h1>
+    <p>{{ lesson.description }}</p>
+
+    <h2>Words:</h2>
+    {% if words %}
+        <ul>
+            {% for word in words %}
+                <li>{{ word.simplified }} ({{ word.pinyin }}) - {{ word.meaning }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No words available for this lesson.</p>
+    {% endif %}
+
+    <h2>Decks:</h2>
+    {% if decks %}
+        <ul>
+            {% for deck in decks %}
+                <li>{{ deck.name }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No decks available for this lesson.</p>
+    {% endif %}
+
+    <a href="{% url 'lessons:edit_lesson' lesson.id %}" class="btn btn-warning">Edit Lesson</a>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Homeworks for {{ lesson.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Homeworks for Lesson: {{ lesson.title }}</h1>
+    <a href="{% url 'lessons:add_homework' lesson.id %}" class="btn btn-primary mb-3">Add Homework</a>
+
+<ul class="list-group">
+    {% for homework in homeworks %}
+    <li class="list-group-item">
+        <div class="mb-3">
+            <strong>Description:</strong> {{ homework.description }}
+        </div>
+        {% if homework.image %}
+        <div class="mb-3">
+            <img src="{{ homework.image.url }}" alt="Homework Image" class="img-fluid" style="max-width: 70%;"/>
+        </div>
+        {% endif %}
+        <div class="mb-2">
+            <small>Added on: {{ homework.created_at|date:"Y-m-d H:i" }}</small>
+        </div>
+        <div class="d-flex justify-content-start">
+            <a href="{% url 'lessons:edit_homework' lesson.id homework.id %}" class="btn btn-warning btn-sm me-2">Edit</a>
+            <form action="{% url 'lessons:homework_delete' lesson.id homework.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+        </div>
+    </li>
+    {% empty %}
+    <li class="list-group-item">No homeworks available.</li>
+    {% endfor %}
+</ul>
+</div>
+{% endblock %}
