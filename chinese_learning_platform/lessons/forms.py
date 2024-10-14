@@ -42,10 +42,11 @@ class LexicalExerciseForm(forms.ModelForm):
         widgets = {
             'text': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
             'audio_file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'parent': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-parent'}),
+            'parent': forms.Select(attrs={'class': 'form-control', 'id': 'searchable-parent'}),  # Change to Select
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['parent'].queryset = LexicalExercise.objects.all()
+
 

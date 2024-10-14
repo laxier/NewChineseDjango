@@ -145,7 +145,7 @@ class EditLexicalExerciseView(LessonRelatedUpdateView):
     template_name = 'lessons/edit_lexical_exercise.html'
     context_object_name = 'lexical_exercise'
     def get_success_url(self):
-        return reverse_lazy('lessons:lexical_exercise_list', kwargs={'lesson_id': self.object.lesson.id})
+        return reverse_lazy('lessons:lexicalexercise_list', kwargs={'lesson_id': self.object.lesson.id})
 
 
 # ReadingText views
