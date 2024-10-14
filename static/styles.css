@@ -855,3 +855,24 @@ main {
     outline: none; /* Remove outline */
     box-shadow: 0 0 0.2rem rgba(255, 255, 255, 0.5); /* Optional: Add shadow for focus */
 }
+
+
+.chinese-dialogue {
+    text-align: justify;
+    background-color: #fefefe;
+    font-size: 26px;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 20px 0;
+    font-family: KaiTi, 'Adobe Kaiti Std', SimSun, MingLiU, PMingLiU, Arial, 'Times New Roman', serif;
+}
+.audio-container {
+    margin-top: 10px; /* Space above the audio player */
+    font-size: 14px; /* Smaller font size for the audio label */
+}
+
+/* Optionally, you can adjust the audio element's width */
+.audio-container audio {
+    width: 80%; /* Adjust this percentage to make it smaller */
+    max-height: 40px; /* Set a maximum width */
+}

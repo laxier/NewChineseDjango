@@ -5,31 +5,17 @@
 
 {% block content %}
 <div class="container">
-    <h1>{{ lesson.title }}</h1>
+    <h1><a href="{% url 'lessons:lesson_list' %}">{{lesson.title }}</a></h1>
     <p>{{ lesson.description }}</p>
 
     <div class="d-flex justify-content-between">
-        <a href="{% url 'lessons:lexical_exercise_list' lesson.id %}" class="btn btn-primary mb-3">Lexical Exercises</a>
+        <a href="{% url 'lessons:lexicalexercise_list' lesson.id %}" class="btn btn-primary mb-3">Lexical Exercises</a>
         <a href="{% url 'lessons:readingtext_list' lesson.id %}" class="btn btn-primary mb-3">Reading Texts</a>
         <a href="{% url 'lessons:homework_list' lesson.id %}" class="btn btn-success mb-3">Manage Homework</a>
     </div>
 
     <!-- Reading Texts Section -->
-    <h2>Reading Texts</h2>
-    <ul>
-        {% for reading_text in reading_texts %}
-        <li>
-            {{ reading_text.text }}
-            {% if reading_text.audio_file %}
-                <br><strong>Audio:</strong>
-                <audio controls>
-                    <source src="{{ reading_text.audio_file.url }}" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
+    {% include 'lessons/includes/reading_texts.html' with reading_texts=reading_texts %}
 
     <!-- New Words Section -->
     <h2>New Words</h2>
@@ -40,21 +26,7 @@
     </ul>
 
     <!-- Lexical Exercises Section -->
-    <h2>Lexical Exercises</h2>
-    <ul>
-        {% for exercise in lexical_exercises %}
-        <li>
-            {{ exercise.text }}
-            {% if exercise.audio_file %}
-                <br><strong>Audio:</strong>
-                <audio controls>
-                    <source src="{{ exercise.audio_file.url }}" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
+    {% include 'lessons/includes/lexical_exercises.html' %}
 
 
     <!-- Decks Section -->

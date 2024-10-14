@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexical Exercises</title>
+    {% load static %}
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .lexical-exercises-container {
+        }
+        .exercise-container {
+        }
+        .audio-player {
+            margin-left: 10px;
+            width: 80px; /* Adjust width of audio player */
+        }
+        .exercise-text {
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+        }
+        .navigation-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="lexical-exercises-container"></div>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+// Lexical Exercises Component
+const LexicalExercises = ({ exercises }) => {
+    const [currentIndex, setCurrentIndex] = React.useState(0);
+
+    const handleNext = () => {
+        if (currentIndex < exercises.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+        }
+    };
+
+    const handlePrevious = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(currentIndex - 1);
+        }
+    };
+
+    const currentExercise = exercises[currentIndex];
+
+    // Function to convert text with line breaks into React elements
+    const formatTextWithLineBreaks = (text) => {
+        return text.split(/\r?\n/).map((part, index) => (
+            <span key={index}>
+                {part}
+                <br />
+            </span>
+        ));
+    };
+
+    return (
+        <div className="lexical-exercises-container">
+            <h2 className="title">Lexical Exercises</h2>
+
+            <div className="navigation-controls">
+                <button className="btn btn-secondary" disabled={currentIndex === 0} onClick={handlePrevious}>← Previous</button>
+                <button className="btn btn-secondary" disabled={currentIndex === exercises.length - 1} onClick={handleNext}>Next →</button>
+            </div>
+
+            <div className="exercise-container">
+                <p className="chinese-dialogue">{formatTextWithLineBreaks(currentExercise.text)}</p> {/* Styled first text */}
+                <div className="audio-container">
+                    <audio className="audio-player" controls>
+                        <source src={currentExercise.audio_file} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+
+            {currentExercise.children.length > 0 && (
+                <div className="child-exercises-container">
+                    {currentExercise.children.map((child) => (
+                        <div key={child.id} className="child-exercise">
+                            <p className="chinese-dialogue">{formatTextWithLineBreaks(child.text)}</p> {/* Styled child text */}
+                            <div className="audio-container">
+                                <audio className="audio-player" controls>
+                                    <source src={child.audio_file} type="audio/mpeg" />
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+
+        // Parse the JSON data
+        const exercisesData = {{ lexical_exercises|safe }};
+        console.log(exercisesData)
+
+        // Render the React component
+        ReactDOM.render(
+            <LexicalExercises exercises={exercisesData} />,
+            document.getElementById('lexical-exercises-container')
+        );
+    </script>
+</body>
+</html>

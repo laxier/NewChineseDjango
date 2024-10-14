@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <h1>Reading Texts for Lesson: {{ lesson.title }}</h1>
+    <h1>Reading Texts for Lesson: <a href="{% url 'lessons:lesson_detail' lesson.id %}">{{lesson.title }}</a></h1>
     <a href="{% url 'lessons:add_readingtext' lesson.id %}" class="btn btn-primary mb-3">Add Reading Text</a>
     
     <ul class="list-group">

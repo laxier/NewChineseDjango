@@ -57,7 +57,7 @@ class LessonListView(ListView):
     template_name = 'lessons/lesson_list.html'
     context_object_name = 'lessons'
 
-
+from .serializers import LexicalExerciseSerializer
 class LessonDetailView(DetailView):
     model = Lesson
     template_name = 'lessons/lesson_detail.html'
@@ -69,20 +69,16 @@ class LessonDetailView(DetailView):
         context['reading_texts'] = self.object.reading_texts.all()
         context['new_words'] = self.object.words.all()
         context['decks'] = self.object.decks.all()
-        context['lexical_exercises'] = self.object.lexical_exercises.all()
         context['homeworks'] = self.object.homeworks.all()
+        exercises = self.object.lexical_exercises.all()
+        serialized_exercises = [LexicalExerciseSerializer(exercise).data for exercise in exercises if exercise.parent==None]
+        context['lexical_exercises'] = serialized_exercises
         return context
-
 
 class LessonCreateView(CreateView):
     model = Lesson
     form_class = LessonForm
     template_name = 'lessons/add_lesson.html'
-
-    def form_valid(self, form):
-        messages.success(self.request, 'Lesson created successfully!')
-        return super().form_valid(form)
-
     success_url = reverse_lazy('lessons:lesson_list')
 
 
@@ -90,11 +86,6 @@ class LessonUpdateView(UpdateView):
     model = Lesson
     form_class = LessonForm
     template_name = 'lessons/edit_lesson.html'
-
-    def form_valid(self, form):
-        messages.success(self.request, 'Lesson updated successfully!')
-        return super().form_valid(form)
-
     success_url = reverse_lazy('lessons:lesson_list')
     pk_url_kwarg = 'lesson_id'
 
@@ -123,29 +114,16 @@ class HomeworkCreateView(LessonRelatedCreateView):
     form_class = HomeworkForm
     template_name = 'lessons/add_homework.html'
 
-    def form_valid(self, form):
-        messages.success(self.request, 'Homework created successfully!')
-        return super().form_valid(form)
-
-
 class HomeworkUpdateView(LessonRelatedUpdateView):
     model = Homework
     form_class = HomeworkForm
     template_name = 'lessons/homework_form.html'
-
-    def form_valid(self, form):
-        messages.success(self.request, 'Homework updated successfully!')
-        return super().form_valid(form)
 
 
 class HomeworkDeleteView(LessonRelatedDeleteView):
     model = Homework
     template_name = 'lessons/homework_confirm_delete.html'
     context_object_name = 'homework'
-
-    def form_valid(self, form):
-        messages.success(self.request, 'Homework deleted successfully!')
-        return super().form_valid(form)
 
 
 # LexicalExercise views
@@ -160,21 +138,12 @@ class LexicalExerciseCreateView(LessonRelatedCreateView):
     form_class = LexicalExerciseForm
     template_name = 'lessons/add_lexical_exercise.html'
 
-    def form_valid(self, form):
-        messages.success(self.request, 'Lexical exercise created successfully!')
-        return super().form_valid(form)
 
-
-class EditLexicalExerciseView(UpdateView):
+class EditLexicalExerciseView(LessonRelatedUpdateView):
     model = LexicalExercise
     form_class = LexicalExerciseForm
     template_name = 'lessons/edit_lexical_exercise.html'
     context_object_name = 'lexical_exercise'
-
-    def form_valid(self, form):
-        messages.success(self.request, 'Lexical exercise updated successfully!')
-        return super().form_valid(form)
-
     def get_success_url(self):
         return reverse_lazy('lessons:lexical_exercise_list', kwargs={'lesson_id': self.object.lesson.id})
 
@@ -185,16 +154,12 @@ class ReadingTextUpdateView(LessonRelatedUpdateView):
     form_class = ReadingTextForm
     template_name = 'lessons/edit_reading_text.html'
 
-    def form_valid(self, form):
-        messages.success(self.request, 'Reading text updated successfully!')
-        return super().form_valid(form)
-
-
 class ReadingTextDeleteView(LessonRelatedDeleteView):
     model = ReadingText
     template_name = 'lessons/reading_text_confirm_delete.html'
     context_object_name = 'reading_text'
 
-    def form_valid(self, form):
-        messages.success(self.request, 'Reading text deleted successfully!')
-        return super().form_valid(form)
+class LexicalExerciseDeleteView(LessonRelatedDeleteView):
+    model = LexicalExercise
+    template_name = 'lessons/lexical_exercise_confirm_delete.html'
+    context_object_name = 'lexical_exercise'

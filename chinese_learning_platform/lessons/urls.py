@@ -3,7 +3,8 @@ from .views import (
     LessonListView, LessonCreateView, LessonUpdateView, LessonDetailView,
     ReadingTextListView, ReadingTextCreateView,
     HomeworkListView, HomeworkCreateView, HomeworkUpdateView, HomeworkDeleteView,
-    LexicalExerciseListView, LexicalExerciseCreateView, ReadingTextUpdateView, ReadingTextDeleteView
+    LexicalExerciseListView, LexicalExerciseCreateView, ReadingTextUpdateView, ReadingTextDeleteView,
+    EditLexicalExerciseView, LexicalExerciseDeleteView
 )
 
 app_name = "lessons"
@@ -24,6 +25,8 @@ urlpatterns = [
     path('<int:lesson_id>/homework/<int:pk>/edit/', HomeworkUpdateView.as_view(), name='edit_homework'),
     path('<int:lesson_id>/homework/<int:pk>/delete/', HomeworkDeleteView.as_view(), name='homework_delete'),
 
-    path('<int:lesson_id>/lexical_exercises/', LexicalExerciseListView.as_view(), name='lexical_exercise_list'),
-    path('<int:lesson_id>/lexical-exercise/add/', LexicalExerciseCreateView.as_view(), name='add_lexical_exercise'),
+    path('<int:lesson_id>/lexical_exercises/', LexicalExerciseListView.as_view(), name='lexicalexercise_list'),
+    path('<int:lesson_id>/lexical-exercise/add/', LexicalExerciseCreateView.as_view(), name='add_lexicalexercise'),
+    path('<int:lesson_id>/lexical_exercise/<int:pk>/edit/', EditLexicalExerciseView.as_view(), name='edit_lexicalexercise'),
+    path('<int:lesson_id>/lexical_exercise/<int:pk>/delete/', LexicalExerciseDeleteView.as_view(), name='lexicalexercise_delete'),
 ]

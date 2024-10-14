@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="container">
-    <h1>Homeworks for Lesson: {{ lesson.title }}</h1>
+    <h1>Homeworks for Lesson: <a href="{% url 'lessons:lesson_detail' lesson.id %}">{{lesson.title }}</a></h1>
     <a href="{% url 'lessons:add_homework' lesson.id %}" class="btn btn-primary mb-3">Add Homework</a>
 
 <ul class="list-group">

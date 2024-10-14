@@ -17,6 +17,7 @@ class LexicalExercise(models.Model):
     text = models.TextField()
     audio_file = models.FileField(upload_to='audio/')
     lesson = models.ForeignKey(Lesson, related_name='lexical_exercises', on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', related_name='children', blank=True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.text

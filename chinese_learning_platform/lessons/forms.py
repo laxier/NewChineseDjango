@@ -38,8 +38,14 @@ class HomeworkForm(forms.ModelForm):
 class LexicalExerciseForm(forms.ModelForm):
     class Meta:
         model = LexicalExercise
-        fields = ['text', 'audio_file']  # Убираем 'lesson' из полей
+        fields = ['text', 'audio_file', 'parent']
         widgets = {
             'text': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
             'audio_file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'parent': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-parent'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['parent'].queryset = LexicalExercise.objects.all()
+
