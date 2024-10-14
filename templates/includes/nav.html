@@ -1,7 +1,7 @@
 {% load static %}
 <ul class="nav col-12 col-md-auto justify-content-center mb-md-0">
     <li><a href="{% url 'frontend:index' %}" class="nav-link px-2">Дом</a></li>
-    {% if current_user.is_authenticated %}
+    {% if request.user.is_authenticated %}
     <li>
         <a href="{% url 'frontend:user_decks' user.username %}" class="nav-link px-2">Профиль</a>
     </li>
@@ -16,6 +16,7 @@
             <li><a class="dropdown-item" href="{% url 'frontend:user_words'%}">Изученные слова</a></li>
             <li><a class="dropdown-item" href="{% url 'frontend:all_words' %}">Слова</a></li>
             <li><a class="dropdown-item" href="{% url 'frontend:user_favorites'%}">Избранные слова</a></li>
+            <li><a class="dropdown-item" href="{% url 'lessons:lesson_list'%}">Уроки Китайского</a></li>
         </ul>
     </li>
     {% else %}

@@ -30,3 +30,6 @@ class Homework(models.Model):
     lesson = models.ForeignKey(Lesson, related_name='homeworks', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='homework_images/')
     description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.lesson

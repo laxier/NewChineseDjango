@@ -1,13 +1,32 @@
 {% extends 'base.html' %}
-
-{% block title %}Add Homework{% endblock %}
+{% load django_bootstrap5 %}
+{% block title %}Add Lesson{% endblock %}
 
 {% block content %}
-<h1>Add Homework</h1>
+<h1>Add Lesson</h1>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% bootstrap_form form %}
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
-<a href="{% url 'lesson_list' %}" class="btn btn-secondary">Cancel</a>
+<a href="{% url 'lessons:lesson_list' %}" class="btn btn-secondary">Cancel</a>
+
+<!-- Add this in the <head> section of your base template -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#searchable-decks').select2({
+            placeholder: "Select decks",
+            allowClear: true,
+        });
+
+        $('#searchable-words').select2({
+            placeholder: "Select words",
+            allowClear: true,
+        });
+    });
+</script>
 {% endblock %}
+
