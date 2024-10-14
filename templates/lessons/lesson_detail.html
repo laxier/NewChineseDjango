@@ -1,34 +1,68 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
-{% block title %}
-    {{ lesson.title }} - 汉语中心
-{% endblock %}
+
+{% block title %}Lesson: {{ lesson.title }}{% endblock %}
 
 {% block content %}
+<div class="container">
     <h1>{{ lesson.title }}</h1>
     <p>{{ lesson.description }}</p>
 
-    <h2>Words:</h2>
-    {% if words %}
-        <ul>
-            {% for word in words %}
-                <li>{{ word.simplified }} ({{ word.pinyin }}) - {{ word.meaning }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No words available for this lesson.</p>
-    {% endif %}
+    <div class="d-flex justify-content-between">
+        <a href="{% url 'lessons:lexical_exercise_list' lesson.id %}" class="btn btn-primary mb-3">Lexical Exercises</a>
+        <a href="{% url 'lessons:readingtext_list' lesson.id %}" class="btn btn-primary mb-3">Reading Texts</a>
+        <a href="{% url 'lessons:homework_list' lesson.id %}" class="btn btn-success mb-3">Manage Homework</a>
+    </div>
 
-    <h2>Decks:</h2>
-    {% if decks %}
-        <ul>
-            {% for deck in decks %}
-                <li>{{ deck.name }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No decks available for this lesson.</p>
-    {% endif %}
+    <!-- Reading Texts Section -->
+    <h2>Reading Texts</h2>
+    <ul>
+        {% for reading_text in reading_texts %}
+        <li>
+            {{ reading_text.text }}
+            {% if reading_text.audio_file %}
+                <br><strong>Audio:</strong>
+                <audio controls>
+                    <source src="{{ reading_text.audio_file.url }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
 
-    <a href="{% url 'lessons:edit_lesson' lesson.id %}" class="btn btn-warning">Edit Lesson</a>
+    <!-- New Words Section -->
+    <h2>New Words</h2>
+    <ul>
+        {% for word in new_words %}
+        <li>{{ word.simplified }} ({{ word.pinyin }}): {{ word.meaning }}</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Lexical Exercises Section -->
+    <h2>Lexical Exercises</h2>
+    <ul>
+        {% for exercise in lexical_exercises %}
+        <li>
+            {{ exercise.text }}
+            {% if exercise.audio_file %}
+                <br><strong>Audio:</strong>
+                <audio controls>
+                    <source src="{{ exercise.audio_file.url }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+
+    <!-- Decks Section -->
+    <h2>Decks</h2>
+    <ul>
+        {% for deck in decks %}
+        <li><a href="{% url 'frontend:deck_detail' deck.id %}">{{ deck.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}

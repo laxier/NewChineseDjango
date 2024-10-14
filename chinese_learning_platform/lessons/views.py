@@ -47,9 +47,13 @@ class LessonDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['words'] = self.object.words.all()
-        context['decks'] = self.object.decks.all()
+        context['reading_texts'] = self.object.reading_texts.all()  # Correct related_name
+        context['new_words'] = self.object.words.all()  # `words` many-to-many field
+        context['decks'] = self.object.decks.all()  # `decks` many-to-many field
+        context['lexical_exercises'] = self.object.lexical_exercises.all()  # Correct related_name
+        context['homeworks'] = self.object.homeworks.all()  # `homeworks` related_name
         return context
+
 
 class LessonCreateView(CreateView):
     model = Lesson
@@ -107,7 +111,6 @@ class LexicalExerciseCreateView(LessonRelatedCreateView):
     form_class = LexicalExerciseForm
     template_name = 'lessons/add_lexical_exercise.html'
 
-# ... (previous code remains the same)
 
 # ReadingText views
 class ReadingTextListView(LessonRelatedListView):
