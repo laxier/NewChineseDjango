@@ -279,12 +279,12 @@ main {
 .dark-theme .form-control {
     background-color: #2d3436;
     color: #d6d6d6;
-    border: 1px solid #424949;
+    border: 1px solid #3e4648;
 }
 
 .dark-theme .form-control:focus {
     color: #d6d6d6;
-    background-color: #424949;
+    background-color: #3e4648;
     outline: 0;
 }
 
@@ -812,9 +812,13 @@ main {
 }
 
 .dark-theme .list-group-item {
-    background-color: #495057; /* Darker background for list items */
-    border-color: #6c757d; /* Lighter border color */
+    background-color: var(--dark-secondary-color);
+    border-color: #3e4648;
     color: aliceblue;
+}
+
+.list-group-item:hover{
+    background-color: #F0F0F0;
 }
 
 .dark-theme .modal-footer {
@@ -822,7 +826,7 @@ main {
 }
 
 .dark-theme .list-group-item:hover {
-    background-color: #6c757d; /* Hover effect */
+    background-color: var(--bs-hover-color); /* Hover effect */
 }
 
 .dark-theme .btn-primary {
