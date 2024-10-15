@@ -5,6 +5,8 @@
 {% block content %}
 <div class="container">
     <h1>{{ user.username }}'s Decks</h1>
+    <a href="{% url 'frontend:create_deck' %}" class="btn btn-primary mb-3">Create Deck</a>
+
     {% if decks %}
         {% for deck in decks %}
             {% if forloop.counter0|divisibleby:4 %}

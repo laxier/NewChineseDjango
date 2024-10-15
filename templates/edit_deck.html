@@ -3,7 +3,7 @@
 {% block content %}
 <h1>
     Edit Deck:
-    <a href="{% url 'frontend:deck_detail' deck.pk %}">{{ deck.name }}</a>
+    <a href="{% url 'frontend:deck_detail' deck.id %}">{{ deck.name }}</a>
 </h1>
 
 <form method="POST">
@@ -32,9 +32,75 @@
 
     <h2 class="mt-4">Add New Words</h2>
     <div class="form-group row align-items-center container">
-            {{ word_form.new_words }}  <!-- Render the field for adding new words -->
-            <small class="form-text text-muted">Введите слова, разделенные запятыми (опционально).</small>
+        {{ word_form.new_words }}  <!-- Render the field for adding new words -->
+        <small class="form-text text-muted">Введите слова, разделенные запятыми (опционально).</small>
     </div>
     <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>
+
+<!-- Delete Button -->
+<button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal" data-bs-target="#deleteDeckModal">
+    Delete Deck
+</button>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteDeckModal" tabindex="-1" aria-labelledby="deleteDeckModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">  <!-- Center the modal vertically -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteDeckModalLabel">Delete Deck</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the deck "{{ deck.name }}"?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const confirmDeleteButton = document.getElementById('confirmDelete');
+
+    confirmDeleteButton.addEventListener('click', function () {
+        fetch('{% url "frontend:delete_deck" deck.id %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => {
+            // Check if response is okay
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Optional: Handle success message
+            if (data.success) {
+                alert('Deck deleted successfully.');
+            } else {
+                alert('Error deleting deck: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // alert('An error occurred while deleting the deck.');
+        })
+        .finally(() => {
+            window.location.href = '{% url "frontend:user_decks" username=request.user.username %}';
+        });
+    });
+});
+
+</script>
 {% endblock %}

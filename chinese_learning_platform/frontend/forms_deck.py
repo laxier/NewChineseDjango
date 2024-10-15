@@ -1,5 +1,6 @@
 from django import forms
 from chineseword.models import ChineseWord
+from users.models import Deck
 
 class WordForm(forms.ModelForm):
     new_words = forms.CharField(
@@ -12,3 +13,17 @@ class WordForm(forms.ModelForm):
     class Meta:
         model = ChineseWord
         fields = []
+
+class CreateDeckForm(forms.ModelForm):
+    words = forms.ModelMultipleChoiceField(
+        queryset=ChineseWord.objects.all(),
+        widget=forms.SelectMultiple(attrs={
+            'class': 'form-select select2',
+            'multiple': 'multiple',
+        }),
+        required=False
+    )
+
+    class Meta:
+        model = Deck
+        fields = ['name', 'words']

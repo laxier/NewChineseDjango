@@ -1,6 +1,6 @@
 from django.urls import path, include
 from .views import IndexPageView, UserDecksView, AllWordsView, UserWordsView, ReviewWordsView, UserFavoritesView
-from .views_deck import DeckDetailView, EditDeckView, ReviewDeckView, TestDeckView, AddDeckView
+from .views_deck import DeckDetailView, EditDeckView, ReviewDeckView, TestDeckView, AddDeckView, CreateDeckView, DeleteDeckView
 
 app_name = 'frontend'
 
@@ -17,4 +17,6 @@ urlpatterns = [
     path('deck/review/<int:pk>/', ReviewDeckView.as_view(), name='review_deck'),
     path('deck/test/<int:pk>/', TestDeckView.as_view(), name='test_deck'),
     path('deck/add/<int:pk>/', AddDeckView.as_view(), name='add_deck'),
+    path('deck/create/', CreateDeckView.as_view(), name='create_deck'),
+    path('deck/<int:pk>/delete/', DeleteDeckView.as_view(), name='delete_deck'),
 ]

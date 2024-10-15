@@ -274,8 +274,49 @@ class TestDeckView(CurrentUserMixin, ReviewDeckMixin, ListView):
     def is_due_for_review(self, word, performance):
         return True
 
+from .forms_deck import CreateDeckForm
+class CreateDeckView(CreateView):
+    form_class = CreateDeckForm
+    template_name = 'create_deck.html'
+    def get_success_url(self):
+        return reverse_lazy('frontend:user_decks', kwargs={'username': self.request.user.username})
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        response = super().form_valid(form)
+        self.object.users.add(self.request.user)
+        return response
+
+
 class AddDeckView(CreateView):
     model = Deck
     template_name = 'add_deck.html'
     fields = ['name']
     success_url = reverse_lazy('frontend:deck_detail')
+
+
+from django.views.generic import DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+class DeleteDeckView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Deck
+
+    def get_success_url(self):
+        return reverse_lazy('frontend:user_decks', kwargs={'username': self.request.user.username})
+
+    def test_func(self):
+        deck = self.get_object()
+        return self.request.user == deck.creator
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        try:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
+            return super().delete(request, *args, **kwargs)
+        except Exception as e:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': str(e)})
+            raise
+    def post(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
