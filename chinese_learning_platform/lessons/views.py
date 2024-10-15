@@ -128,7 +128,7 @@ class HomeworkListView(LessonRelatedListView):
 
 
 
-class HomeworkCreateView(LoginRequiredMixin, LessonRelatedCreateView):
+class HomeworkCreateView(LessonRelatedCreateView, LoginRequiredMixin):
     model = Homework
     form_class = HomeworkForm
     template_name = 'lessons/add_homework.html'
