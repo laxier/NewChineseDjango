@@ -12,7 +12,31 @@
             <button class="btn btn-primary" type="submit">Поиск</button>
         </div>
         <div class="input-group-append">
-            <button class="btn btn-secondary" type="submit" formaction="{% url 'frontend:review_words' %}">Повторить</button>
+            <button class="btn btn-secondary" type="button" id="repeatButton">Повторить</button>
         </div>
     </div>
 </form>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const repeatButton = document.getElementById('repeatButton');
+
+    repeatButton.addEventListener('click', function () {
+        // Get current form action URL
+        const url = "{% url 'frontend:review_words' %}";
+
+        // Create a URLSearchParams object to hold the existing query parameters
+        const params = new URLSearchParams(window.location.search);
+
+        // Get sort_by and sort_order from existing query parameters, or use default values if they don't exist
+        const sortBy = params.get('sort_by') || 'default_sort_by'; // replace 'default_sort_by' with your actual default if needed
+        const sortOrder = params.get('sort_order') || 'asc'; // replace 'asc' with your desired default if needed
+
+        // Append the specific parameters for the repeat action
+        params.set('sort_by', sortBy);
+        params.set('sort_order', sortOrder);
+
+        // Redirect to the new URL with the query parameters
+        window.location.href = `${url}?${params.toString()}`;
+    });
+});
+</script>
