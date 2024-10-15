@@ -902,30 +902,10 @@ main {
     border-color: #28a745; /* Keep border color consistent */
 }
 
-
-/* Dark Theme Styles for Table */
-.dark-theme .table-responsive {
-    background-color: #121212; /* Dark background for table container */
+.btn-warning{
+    color: white;
 }
 
-.dark-theme .table {
-    background-color: #1e1e1e; /* Darker background for table */
-    color: #e0e0e0; /* Light text color for better contrast */
-}
-
-.dark-theme .table-light {
-    background-color: #1e1e1e; /* Dark background for header */
-}
-
-.dark-theme .table-striped tbody tr:nth-of-type(odd) {
-    background-color: #2b2b2b; /* Darker background for odd rows */
-}
-
-.dark-theme .table-bordered {
-    border: 1px solid #444; /* Darker border color */
-}
-
-.dark-theme .table th,
-.dark-theme .table td {
-    border-color: #444; /* Darker border for cells */
+.btn-info{
+    color: white;
 }
