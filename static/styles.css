@@ -785,6 +785,17 @@ main {
     .prev-button, .next-button {
         padding: 8px 12px; /* Уменьшаем отступы по вертикали и горизонтали */
     }
+    .row-item:last-child {
+    flex-direction: column-reverse;
+}
+.row-item .btn {
+    justify-content: center;
+    display: flex;
+    border-radius: 0;
+    width: -webkit-fill-available;
+    align-items: center;
+    opacity: 96%;
+}
 }
 
 @media (max-width: 426px) {
