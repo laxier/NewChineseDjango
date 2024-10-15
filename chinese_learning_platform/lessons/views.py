@@ -127,10 +127,15 @@ class HomeworkListView(LessonRelatedListView):
         return super().get_queryset().filter(user=user)
 
 
-class HomeworkCreateView(LessonRelatedCreateView):
+
+class HomeworkCreateView(LoginRequiredMixin, LessonRelatedCreateView):
     model = Homework
     form_class = HomeworkForm
     template_name = 'lessons/add_homework.html'
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
 
 class HomeworkOwnerMixin:
