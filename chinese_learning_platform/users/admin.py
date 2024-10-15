@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Deck, WordPerformance, DeckPerformance, DeckWord
+from .models import Deck, WordPerformance, DeckPerformance, DeckWord, UserDeck
 
 class DeckWordInline(admin.TabularInline):
     model = DeckWord
@@ -20,11 +20,17 @@ class DeckAdmin(admin.ModelAdmin):
 @admin.register(WordPerformance)
 class WordPerformanceAdmin(admin.ModelAdmin):
     list_display = ('user', 'word', 'right', 'wrong', 'timestamp', 'next_review_date')
-    search_fields = ('user__username', 'word__character')
+    search_fields = ('user__username', 'word__simplified', 'word__meaning')
     list_filter = ('user',)
 
 @admin.register(DeckPerformance)
 class DeckPerformanceAdmin(admin.ModelAdmin):
     list_display = ('user', 'deck', 'percent_correct', 'test_date')
+    search_fields = ('user__username', 'deck__name')
+    list_filter = ('user',)
+
+@admin.register(UserDeck)
+class DeckPerformanceAdmin(admin.ModelAdmin):
+    list_display = ('user', 'deck', 'percent', 'timestamp')
     search_fields = ('user__username', 'deck__name')
     list_filter = ('user',)

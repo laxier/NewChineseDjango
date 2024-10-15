@@ -1,7 +1,9 @@
 from django.db import models
 from chineseword.models import ChineseWord
 from users.models import Deck
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class Lesson(models.Model):
     title = models.CharField(max_length=200)
@@ -30,9 +32,11 @@ class ReadingText(models.Model):
     audio_file = models.FileField(upload_to='audio/', blank=True)
 
 class Homework(models.Model):
-    lesson = models.ForeignKey(Lesson, related_name='homeworks', on_delete=models.CASCADE)
+    lesson = models.ForeignKey('Lesson', related_name='homeworks', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='homeworks', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='homework_images/')
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return self.lesson
+        return f'Homework for {self.lesson} by {self.user.username}'
