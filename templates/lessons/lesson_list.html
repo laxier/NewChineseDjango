@@ -8,38 +8,37 @@
 
     <a href="{% url 'lessons:add_lesson' %}" class="btn btn-primary mb-3">Add New Lesson</a>
 
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered">
-            <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for lesson in lessons %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td><a href="{% url 'lessons:lesson_detail' lesson.id %}">{{lesson.title }}</a></td>
-                    <td>{{ lesson.description|truncatewords:10 }}</td>
-                    <td>{{ lesson.created_at|date:"Y-m-d H:i" }}</td>
-                    <td>
-                        <a href="{% url 'lessons:edit_lesson' lesson.id %}" class="btn btn-warning btn-sm">Edit</a>
-                        <a href="{% url 'lessons:readingtext_list' lesson.id %}" class="btn btn-info btn-sm">Reading Texts</a>
-                        <a href="{% url 'lessons:homework_list' lesson.id %}" class="btn btn-secondary btn-sm">Homeworks</a>
-                        <a href="{% url 'lessons:lexicalexercise_list' lesson.id %}" class="btn btn-success btn-sm">Lexical Exercises</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No lessons found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="table-container">
+    <div class="table-row heading">
+        <div class="row-item" style="flex: 0 0 5%;">#</div>
+        <div class="row-item" style="flex: 0 0 20%;">Title</div>
+        <div class="row-item" style="flex: 0 0 20%;">Description</div>
+        <div class="row-item" style="flex: 0 0 20%;">Created At</div>
+        <div class="row-item" style="flex: 0 0 35%;">Actions</div>
     </div>
+    <div class="table-body">
+        {% for lesson in lessons %}
+        <div class="table-row">
+            <div class="row-item" style="flex: 0 0 5%;">{{ forloop.counter }}</div>
+            <div class="row-item" style="flex: 0 0 20%;"><a href="{% url 'lessons:lesson_detail' lesson.id %}">{{ lesson.title }}</a></div>
+            <div class="row-item" style="flex: 0 0 20%;">{{ lesson.description|truncatewords:10 }}</div>
+            <div class="row-item" style="flex: 0 0 20%;">{{ lesson.created_at|date:"Y-m-d H:i" }}</div>
+            <div class="row-item" style="flex: 0 0 35%; justify-content: space-evenly;">
+                <a href="{% url 'lessons:edit_lesson' lesson.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                <a href="{% url 'lessons:readingtext_list' lesson.id %}" class="btn btn-secondary btn-sm">Reading Texts</a>
+
+                <a href="{% url 'lessons:lexicalexercise_list' lesson.id %}" class="btn btn-secondary btn-sm">Lexical Exercises</a>
+                <a href="{% url 'lessons:homework_list' lesson.id %}" class="btn btn-success btn-sm">Homeworks</a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="table-row">
+            <div class="row-item" colspan="5" class="text-center">No lessons found.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
 </div>
 {% endblock %}

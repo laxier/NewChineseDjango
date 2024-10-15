@@ -1,0 +1,71 @@
+/* Dark Theme for Select2 */
+.dark-theme .select2-container--default .select2-selection--single {
+    background-color: #333; /* Dark background */
+    border: 1px solid #555; /* Darker border */
+    color: #fff; /* Light text color */
+}
+
+.dark-theme .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #fff; /* Light text color */
+}
+
+.dark-theme .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #bbb; /* Placeholder color */
+}
+
+.dark-theme .select2-container--default .select2-selection--multiple {
+    background-color: #333; /* Dark background */
+    border: 1px solid #555; /* Darker border */
+}
+
+.dark-theme .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    color: #fff; /* Light text color */
+}
+
+.dark-theme .select2-container--default .select2-results__option {
+    background-color: #444; /* Darker option background */
+    color: #fff; /* Light text color */
+}
+
+.dark-theme .select2-container--default .select2-results__option[aria-selected] {
+    background-color: #555; /* Highlighted option background */
+    color: #fff; /* Light text color */
+}
+
+.dark-theme .select2-container--default .select2-results__option:hover {
+    background-color: #666; /* Hover state background */
+}
+
+.dark-theme .select2-container--default .select2-dropdown {
+    background-color: #333; /* Dark dropdown background */
+    border: 1px solid #555; /* Darker border */
+}
+
+/* Search input in dropdown */
+.dark-theme .select2-search--dropdown .select2-search__field {
+    background-color: #444; /* Dark background for search field */
+    color: #fff; /* Light text color */
+    border: 1px solid #555; /* Darker border */
+}
+
+/* Clear button */
+.dark-theme .select2-container--default .select2-selection--single .select2-selection__clear {
+    color: #fff; /* Light text color */
+}
+
+/* Adjust for disabled state */
+.dark-theme .select2-container--default.select2-container--disabled .select2-selection--single {
+    background-color: #555; /* Darker background for disabled */
+    color: #999; /* Lighter text color for disabled */
+}
+
+/* Adjust for focus state */
+.dark-theme .select2-container--default.select2-container--focus .select2-selection--single {
+    border: 1px solid #999; /* Lighter border on focus */
+}
+
+.dark-theme .select2-container--default .select2-selection__choice {
+    background-color: #444; /* Dark background for choice */
+    color: #555; /* Light text color */
+}
+

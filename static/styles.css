@@ -805,9 +805,11 @@ main {
     border-color: #6c757d; /* Lighter border color */
     color: aliceblue;
 }
-.dark-theme .modal-footer{
+
+.dark-theme .modal-footer {
     border: var(--black-border);
 }
+
 .dark-theme .list-group-item:hover {
     background-color: #6c757d; /* Hover effect */
 }
@@ -821,6 +823,7 @@ main {
     background-color: #dc3545; /* Danger button color */
     border-color: #dc3545; /* Border color */
 }
+
 .dark-theme .btn-close {
     background: none; /* Remove the default SVG background */
     border: none; /* Remove any borders */
@@ -865,6 +868,7 @@ main {
     margin: 20px 0;
     font-family: KaiTi, 'Adobe Kaiti Std', SimSun, MingLiU, PMingLiU, Arial, 'Times New Roman', serif;
 }
+
 .audio-container {
     margin-top: 10px; /* Space above the audio player */
     font-size: 14px; /* Smaller font size for the audio label */
@@ -874,4 +878,34 @@ main {
 .audio-container audio {
     width: 80%; /* Adjust this percentage to make it smaller */
     max-height: 40px; /* Set a maximum width */
+}
+
+
+/* Adjust button colors for dark theme */
+.dark-theme .btn-warning {
+    background-color: #ffc107; /* Keep button colors consistent */
+    border-color: #ffc107; /* Keep border color consistent */
+}
+
+.dark-theme .btn-info {
+    background-color: #17a2b8; /* Keep button colors consistent */
+    border-color: #17a2b8; /* Keep border color consistent */
+}
+
+.dark-theme .btn-secondary {
+    background-color: #6c757d; /* Keep button colors consistent */
+    border-color: #6c757d; /* Keep border color consistent */
+}
+
+.dark-theme .btn-success {
+    background-color: #28a745; /* Keep button colors consistent */
+    border-color: #28a745; /* Keep border color consistent */
+}
+
+.btn-warning{
+    color: white;
+}
+
+.btn-info{
+    color: white;
 }
