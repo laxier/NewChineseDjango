@@ -14,15 +14,6 @@ class LessonForm(forms.ModelForm):
             'words_for_understanding': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-words_for_understanding'}),
         }
 
-    # def __init__(self, *args, **kwargs):
-        # super().__init__(*args, **kwargs)
-        # self.fields['decks'].queryset = Deck.objects.all()
-        # all_words = ChineseWord.objects.all()
-        #
-        # self.fields['words'].queryset = all_words
-        # self.fields['supplementary_words'].queryset = all_words
-        # self.fields['words_for_understanding'].queryset = all_words
-
 class ReadingTextForm(forms.ModelForm):
     class Meta:
         model = ReadingText

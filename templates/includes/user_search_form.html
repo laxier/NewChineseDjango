@@ -44,12 +44,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const params = new URLSearchParams(window.location.search);
 
         // Get sort_by and sort_order from existing query parameters, or use default values if they don't exist
-        const sortBy = params.get('sort_by') || 'default_sort_by'; // replace 'default_sort_by' with your actual default if needed
-        const sortOrder = params.get('sort_order') || 'asc'; // replace 'asc' with your desired default if needed
+        const sortBy = params.get('sort_by');
+        const sortOrder = params.get('sort_order');
 
-        // Append the specific parameters for the repeat action
-        params.set('sort_by', sortBy);
-        params.set('sort_order', sortOrder);
+        if (sortBy) {
+            params.set('sort_by', sortBy);
+        }
+
+        if (sortOrder) {
+            params.set('sort_order', sortOrder);
+        }
 
         // Redirect to the new URL with the query parameters
         window.location.href = `${url}?${params.toString()}`;
