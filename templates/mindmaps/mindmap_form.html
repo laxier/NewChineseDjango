@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}  <!-- Загрузка библиотеки Bootstrap 5 -->
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Create a New Mind Map</h1>
+
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {% bootstrap_form form %}  <!-- Рендерим форму с Bootstrap 5 -->
+
+        <button type="submit" class="btn btn-primary mt-3">Create Mind Map</button>
+    </form>
+
+    <a href="{% url 'mindmap-list' %}" class="btn btn-secondary mt-3">Back to Mind Maps</a>
+</div>
+{% endblock %}

@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import MindMapViewSet, ChineseWordViewSet, AddWordToMindMapView, DeckPerformanceViewSet, \
     WordPerformanceViewSet, SentenceListCreateView, SentenceRetrieveUpdateDestroyView, ChineseWordFavoriteView, \
     ChineseWordFavoriteStatusView
+app_name='api'
 
 router = DefaultRouter()
 router.register(r'mindmaps', MindMapViewSet)

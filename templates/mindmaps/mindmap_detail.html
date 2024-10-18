@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet" type="text/css"/>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+
+<div class="info">
+    <h2>{{ mindmap.title }}</h2> <!-- Display the title dynamically -->
+    <p>This mind map illustrates the relationships between different Chinese words related to '{{ mindmap.title }}'.</p>
+    <p>Click on the nodes to explore their meanings and pinyin. Use drag and zoom features to navigate the mind map.</p>
+</div>
+
+<div id="mindmap" style="width: 100%; height: 600px;"></div> <!-- Increased height for better visibility -->
+
+
+<script>
+    // Fetch the mind map data from the server
+    // Fetch the mind map data from the server
+    // Fetch the mind map data from the server
+    fetch("{% url 'api:mindmap-detail' mindmap.id %}")
+        .then(response => response.json())
+        .then(data => {
+            const nodes = [];
+            const edges = [];
+
+            function calculateNodeSize(word) {
+                const baseSize = 40;
+                const textLength = word.simplified.length;
+                return Math.max(baseSize, textLength * 15); // Adjust multiplier as needed
+            }
+
+            function processNode(word, parentId = null, level = 0, index = 0, totalSiblings = 1, direction = 0, parentY = 0) {
+const horizontalSpacing = 100; // Spacing between nodes horizontally
+    const verticalSpacing = 20; // Default vertical spacing between nodes
+    const commonAncestorSpacing = 40; // Space around the common ancestor
+
+    let x, y;
+    if (level === 0) {
+        x = 0;
+        y = 0; // Position of common ancestor
+    } else if (level === 1) {
+        x = direction * horizontalSpacing;
+        // Position child nodes based on the number of children
+        y = (index - (totalSiblings - 1) / 2) * verticalSpacing/2 + commonAncestorSpacing;
+    } else {
+        x = direction * (horizontalSpacing * level);
+        y = parentY + (index - (totalSiblings - 1) / 2) * verticalSpacing;
+    }
+
+    const nodeSize = calculateNodeSize(word);
+
+    // Check for overlaps and adjust position
+    let overlap = true;
+    while (overlap) {
+        overlap = nodes.some(node =>
+            Math.abs(node.x - x) < (nodeSize + node.size) / 2 &&
+            Math.abs(node.y - y) < (nodeSize + node.size) / 2
+        );
+        if (overlap) {
+            y += verticalSpacing / 2; // Move down if overlap detected
+        }
+    }
+
+                nodes.push({
+                    id: word.id,
+                    label: `${word.simplified}`,
+                    shape: 'box',
+                    color: {
+                        background: '#FF6F61',
+                        border: '#333'
+                    },
+                    font: {color: 'black', size: 16},
+                    title: `${word.pinyin}\n${word.meaning}`,
+                    level: level,
+                    x: x,
+                    y: y,
+                    size: nodeSize
+                });
+
+                if (parentId) {
+                    edges.push({from: parentId, to: word.id});
+                }
+
+                if (word.children) {
+                    word.children.forEach((child, childIndex) =>
+                        processNode(child, word.id, level + 1, childIndex, word.children.length, direction, y)
+                    );
+                }
+            }
+
+            const commonAncestorId = 'commonAncestor';
+            nodes.push({
+                id: commonAncestorId,
+                label: '',
+                shape: 'box',
+                color: {
+                    background: '#ffffff',
+                    border: '#000000'
+                },
+                font: {color: 'black', size: 20},
+                level: 0,
+                x: 0,
+                y: 200,
+                size: calculateNodeSize({simplified: data.title})
+            });
+
+            const midpoint = Math.floor(data.root_words.length / 2);
+            data.root_words.forEach((rootWord, index) => {
+                const direction = index < midpoint ? -1 : 1; // Left side: -1, Right side: 1
+                edges.push({from: commonAncestorId, to: rootWord.id});
+                processNode(rootWord, commonAncestorId, 1, index % midpoint, midpoint, direction, 0);
+            });
+
+            const container = document.getElementById('mindmap');
+            const visData = {nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges)};
+
+            const options = {
+                layout: {
+                    improvedLayout: false,
+                },
+                interaction: {
+                    dragNodes: true,
+                    dragView: true,
+                    zoomView: true,
+                    selectConnectedEdges: true,
+                },
+                nodes: {
+                    shape: 'box',
+                    font: {
+                        size: 16
+                    }
+                },
+                edges: {
+                    smooth: {
+                        type: 'cubicBezier',
+                        forceDirection: 'horizontal'
+                    },
+                    arrows: {
+                        to: {enabled: true, scaleFactor: 0.5}
+                    },
+                },
+                physics: {
+                    enabled: false
+                }
+            };
+
+            const network = new vis.Network(container, visData, options);
+            network.once('afterDrawing', function () {
+                network.fit({
+                    nodes: [commonAncestorId],
+                    animation: {
+                        duration: 1000,
+                        easingFunction: 'easeInOutQuad'
+                    },
+                    scale: 1.2 // Adjust the scale to better fit the view
+                });
+            });
+        })
+        .catch(error => console.error('Error fetching mind map data:', error));
+</script>
+
+{% endblock %}

@@ -28,6 +28,7 @@ urlpatterns = [
     path('word/', include('wordpages.urls')),
     path('accounts/', include('users.urls')),
     path('lessons/', include('lessons.urls')),
+    path('mindmaps/', include('mindmaps.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:  # Ensure to import settings if not already done
