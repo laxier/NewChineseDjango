@@ -1,0 +1,33 @@
+{% load static %}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="display-4">{{ chinese_word.simplified }}</h1>
+        {% if user.is_authenticated %}
+        <button id="favorite-button" class="btn {% if user in chinese_word.favorites.all %}btn-secondary{% else %}btn-danger{% endif %}" onclick="toggleFavoriteMindmap({{chinese_word.id}})">
+            {% if is_favorite %}
+            Unfavorite
+            {% else %}
+            Favorite
+            {% endif %}
+        </button>
+        {% else %}
+        <button id="favorite-button" class="btn btn-secondary" disabled>
+            Please log in to favorite
+        </button>
+        {% endif %}
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p>Pinyin: <strong>{{ chinese_word.pinyin }}</strong></p>
+            <p>Meaning: <strong>{{ chinese_word.meaning }}</strong></p>
+            <p>HSK Level: <strong>{{ chinese_word.hsk_level }}</strong></p>
+        </div>
+    </div>
+
+    <h2 class="mt-4">Stroke Order</h2>
+    <div id="stroke-order-container" class="d-flex flex-no-wrap mb-4"></div>
+
+    {% include 'wordpages/includes/sentences_list.html' %}
+    {% include 'wordpages/includes/related_words_list.html' %}
+</div>

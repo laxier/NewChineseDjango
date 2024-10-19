@@ -6,17 +6,26 @@
 </head>
 
 <div class="info">
-    <h2>{{ mindmap.title }}</h2> <!-- Display the title dynamically -->
+    <h2>{{ mindmap.title }}</h2>
     <p>This mind map illustrates the relationships between different Chinese words related to '{{ mindmap.title }}'.</p>
-    <p>Click on the nodes to explore their meanings and pinyin. Use drag and zoom features to navigate the mind map.</p>
+    <p>Click on the nodes to explore their meanings and pinyin.</p>
 </div>
 
-<div id="mindmap" style="width: 100%; height: 600px;"></div> <!-- Increased height for better visibility -->
+<div class="row">
+    <!-- Mind Map on the left (col-md-8 for larger width) -->
+    <div id="mindmap" class="col-md-8" style="height: 600px;"></div>
 
-
+    <!-- Word details on the right (col-md-4 for smaller width) -->
+    <div id="word-details" class="col-md-4">
+        <h4>Word Details</h4>
+        <div id="word-content">
+            <!-- This content will be dynamically populated -->
+            <p>Select a word from the mind map to see details here.</p>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer/dist/hanzi-writer.min.js"></script>
 <script>
-    // Fetch the mind map data from the server
-    // Fetch the mind map data from the server
     // Fetch the mind map data from the server
     fetch("{% url 'api:mindmap-detail' mindmap.id %}")
         .then(response => response.json())
@@ -31,36 +40,36 @@
             }
 
             function processNode(word, parentId = null, level = 0, index = 0, totalSiblings = 1, direction = 0, parentY = 0) {
-const horizontalSpacing = 100; // Spacing between nodes horizontally
-    const verticalSpacing = 20; // Default vertical spacing between nodes
-    const commonAncestorSpacing = 40; // Space around the common ancestor
+                const horizontalSpacing = 100; // Spacing between nodes horizontally
+                const verticalSpacing = 20; // Default vertical spacing between nodes
+                const commonAncestorSpacing = 40; // Space around the common ancestor
 
-    let x, y;
-    if (level === 0) {
-        x = 0;
-        y = 0; // Position of common ancestor
-    } else if (level === 1) {
-        x = direction * horizontalSpacing;
-        // Position child nodes based on the number of children
-        y = (index - (totalSiblings - 1) / 2) * verticalSpacing/2 + commonAncestorSpacing;
-    } else {
-        x = direction * (horizontalSpacing * level);
-        y = parentY + (index - (totalSiblings - 1) / 2) * verticalSpacing;
-    }
+                let x, y;
+                if (level === 0) {
+                    x = 0;
+                    y = 0; // Position of common ancestor
+                } else if (level === 1) {
+                    x = direction * horizontalSpacing;
+                    // Position child nodes based on the number of children
+                    y = (index - (totalSiblings - 1) / 2) * verticalSpacing / 2 + commonAncestorSpacing;
+                } else {
+                    x = direction * (horizontalSpacing * level);
+                    y = parentY + (index - (totalSiblings - 1) / 2) * verticalSpacing;
+                }
 
-    const nodeSize = calculateNodeSize(word);
+                const nodeSize = calculateNodeSize(word);
 
-    // Check for overlaps and adjust position
-    let overlap = true;
-    while (overlap) {
-        overlap = nodes.some(node =>
-            Math.abs(node.x - x) < (nodeSize + node.size) / 2 &&
-            Math.abs(node.y - y) < (nodeSize + node.size) / 2
-        );
-        if (overlap) {
-            y += verticalSpacing / 2; // Move down if overlap detected
-        }
-    }
+                // Check for overlaps and adjust position
+                let overlap = true;
+                while (overlap) {
+                    overlap = nodes.some(node =>
+                        Math.abs(node.x - x) < (nodeSize + node.size) / 2 &&
+                        Math.abs(node.y - y) < (nodeSize + node.size) / 2
+                    );
+                    if (overlap) {
+                        y += verticalSpacing / 2; // Move down if overlap detected
+                    }
+                }
 
                 nodes.push({
                     id: word.id,
@@ -156,8 +165,258 @@ const horizontalSpacing = 100; // Spacing between nodes horizontally
                     scale: 1.2 // Adjust the scale to better fit the view
                 });
             });
+
+            network.on("click", function (params) {
+                if (params.nodes.length) {
+                    const wordId = params.nodes[0];
+                    const nodeData = network.body.data.nodes.get(wordId);
+                    if (nodeData) {
+                        const wordSimplified = nodeData.label;
+                        loadWordDetails(wordId, wordSimplified);
+                    } else {
+                        console.warn('Node data not found for wordId:', wordId);
+                    }
+                }
+            });
         })
         .catch(error => console.error('Error fetching mind map data:', error));
+
+    function loadWordDetails(wordId, wordSimplified) { // Ensure wordPinyin is passed as a parameter
+        fetch(`/word/${wordId}/?is_mindmap=true`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('word-details').innerHTML = html;
+                if (wordSimplified) {
+                    loadAndRenderCharacterStrokes(wordSimplified);
+                } else {
+                    console.error('wordSimplified is not defined');
+                }
+            })
+            .catch(error => console.error('Error loading word details:', error));
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 </script>
 
+<script>
+    let sentenceModal; // Global variable to hold the sentence modal instance
+    let deleteConfirmationModal; // Global variable to hold the delete confirmation modal instance
+    let currentDeleteId; // Global variable to store the ID of the sentence to delete
+
+    // Function to open the Add Sentence modal
+    function openAddSentencePopup(wordId) {
+        const sentenceModalElement = document.getElementById('sentenceModal');
+
+        // Initialize modal if it hasn't been created yet
+        if (!sentenceModal) {
+            sentenceModal = new bootstrap.Modal(sentenceModalElement);
+        }
+
+        document.getElementById('sentenceModalLabel').innerText = 'Add Sentence';
+        document.getElementById('sentence-form').reset();
+        document.getElementById('sentence-id').value = '';
+        document.getElementById('chinese-word-id').value = wordId;
+        sentenceModal.show(); // Show the modal
+    }
+
+    // Function to open the Edit Sentence modal
+    function openSentencePopup(id, content, meaning) {
+        const sentenceModalElement = document.getElementById('sentenceModal');
+
+        // Initialize modal if it hasn't been created yet
+        if (!sentenceModal) {
+            sentenceModal = new bootstrap.Modal(sentenceModalElement);
+        }
+
+        document.getElementById('sentenceModalLabel').innerText = 'Edit Sentence';
+        document.getElementById('sentence-content').value = content;
+        document.getElementById('sentence-meaning').value = meaning;
+        document.getElementById('sentence-id').value = id;
+        document.getElementById('chinese-word-id').value = '{{ chinese_word.id }}';
+        sentenceModal.show(); // Show the modal
+    }
+
+    // Function to open the delete confirmation modal
+    function openDeleteConfirmation(id) {
+        const deleteConfirmationModalElement = document.getElementById('deleteConfirmationModal');
+
+        // Initialize modal if it hasn't been created yet
+        if (!deleteConfirmationModal) {
+            deleteConfirmationModal = new bootstrap.Modal(deleteConfirmationModalElement);
+        }
+
+        currentDeleteId = id; // Set the ID of the sentence to be deleted
+        deleteConfirmationModal.show(); // Show the modal
+    }
+
+    // Function to confirm deletion of a sentence
+    function confirmDelete() {
+        if (currentDeleteId) {
+            deleteSentence(currentDeleteId);
+            // Hide the delete confirmation modal without reinitializing it
+            if (deleteConfirmationModal) {
+                deleteConfirmationModal.hide(); // Hide the modal if it exists
+            }
+        }
+    }
+
+    // Function to delete a sentence
+    function deleteSentence(id) {
+        fetch(`/api/v1/sentences/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    const sentenceItem = document.getElementById('sentence-' + id);
+                    sentenceItem.remove();
+                } else {
+                    throw new Error('Failed to delete sentence');
+                }
+            })
+            .catch(error => console.error('Error deleting sentence:', error));
+    }
+
+    // Function to submit the sentence form
+    function submitSentenceForm(chineseWordId) {
+        const id = document.getElementById('sentence-id').value;
+        const content = document.getElementById('sentence-content').value;
+        const meaning = document.getElementById('sentence-meaning').value;
+        // const chineseWordId = document.getElementById('chinese-word-id').value;
+
+        const url = id ? `/api/v1/sentences/${id}/` : '/api/v1/sentences/';
+        const method = id ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({content, meaning, chinese_word_id: chineseWordId})
+        })
+            .then(response => response.json())
+            .then(data => {
+                const sentenceItem = document.getElementById('sentence-' + data.id);
+                const safeContent = escapeHtml(data.content);
+                const safeMeaning = escapeHtml(data.meaning);
+                const html = `
+            <span>${safeContent} : ${safeMeaning}</span>
+            <div>
+                <button class="btn btn-sm btn-primary" onclick="openSentencePopup('${data.id}', '${escapeHtml(data.content)}', '${escapeHtml(data.meaning)}')">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="openDeleteConfirmation('${data.id}')">Delete</button>
+            </div>`;
+
+                if (sentenceItem) {
+                    sentenceItem.innerHTML = html;
+                } else {
+                    const newSentenceItem = document.createElement('li');
+                    newSentenceItem.id = 'sentence-' + data.id;
+                    newSentenceItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    newSentenceItem.innerHTML = html;
+                    document.getElementById('sentences-list').appendChild(newSentenceItem);
+                }
+                if (sentenceModal) {
+                    sentenceModal.hide(); // Hide the modal after submitting the form
+                }
+            })
+            .catch(error => console.error('Error updating/creating sentence:', error));
+    }
+</script>
+<script>
+    function loadAndRenderCharacterStrokes(characters) {
+        const container = document.getElementById('stroke-order-container');
+        const isDarkMode = localStorage.getItem('theme') === 'dark';
+        const strokeColor = isDarkMode ? '#ffffff' : '#333333';
+        const outlineColor = isDarkMode ? '#333333' : '#ffffff';
+
+        characters.split('').forEach((char, index) => {
+            const charContainer = document.createElement('div');
+            charContainer.style.display = 'inline-block';
+            charContainer.style.margin = '10px';
+            container.appendChild(charContainer);
+
+            const targetId = `char-${index}`;
+            const charElement = document.createElement('div');
+            charElement.id = targetId;
+            charElement.style.width = '100px';
+            charElement.style.height = '100px';
+            charContainer.appendChild(charElement);
+
+            HanziWriter.loadCharacterData(char).then(function (charData) {
+                const writer = HanziWriter.create(targetId, char, {
+                    width: 100,
+                    height: 100,
+                    padding: 5,
+                    strokeAnimationSpeed: 1, // Adjust speed as needed
+                    delayBetweenStrokes: 50, // Adjust delay as needed
+                    strokeColor: strokeColor,
+                    outlineColor: outlineColor,
+                });
+
+                // Add animation controls
+                const animateButton = document.createElement('button');
+                animateButton.textContent = 'Animate';
+                animateButton.onclick = () => writer.animateCharacter();
+                charContainer.appendChild(animateButton);
+
+                const quizButton = document.createElement('button');
+                quizButton.textContent = 'Quiz';
+                quizButton.onclick = () => writer.quiz();
+                charContainer.appendChild(quizButton);
+
+            }).catch(error => {
+                console.error(`Failed to load char data for ${char}:`, error);
+                const errorMessage = document.createElement('p');
+                errorMessage.innerText = `Stroke order data not available for ${char}.`;
+                charContainer.appendChild(errorMessage);
+            });
+        });
+    }
+</script>
+<script>
+    function toggleFavoriteMindmap(wordId) {
+        const button = document.getElementById('favorite-button');
+
+        fetch(`/api/v1/words/${wordId}/favorite/`, {
+            method: 'PUT', // Use PUT for update
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for security
+            },
+            body: JSON.stringify({user: "{{ user.id }}"}) // Send user ID in the request
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Toggle button text and class based on current state
+                    if (button.innerText === 'Favorite') {
+                        button.innerText = 'Unfavorite';
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-secondary'); // Grey button for unfavorite
+                    } else {
+                        button.innerText = 'Favorite';
+                        button.classList.remove('btn-secondary');
+                        button.classList.add('btn-danger'); // Red button for favorite
+                    }
+                } else {
+                    console.error('Error toggling favorite:', response.statusText);
+                }
+            })
+            .catch(error => console.error('Error toggling favorite:', error));
+    }
+</script>
 {% endblock %}
