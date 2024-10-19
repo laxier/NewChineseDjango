@@ -215,11 +215,6 @@
             })
             .then(html => {
                 document.getElementById('word-details').innerHTML = html;
-                if (wordSimplified) {
-                    loadAndRenderCharacterStrokes(wordSimplified);
-                } else {
-                    console.error('wordSimplified is not defined');
-                }
             })
             .catch(error => console.error('Error loading word details:', error));
     }
@@ -361,57 +356,8 @@
             .catch(error => console.error('Error updating/creating sentence:', error));
     }
 </script>
-<script>
-    function loadAndRenderCharacterStrokes(characters) {
-        const container = document.getElementById('stroke-order-container');
-        const isDarkMode = localStorage.getItem('theme') === 'dark';
-        const strokeColor = isDarkMode ? '#ffffff' : '#333333';
-        const outlineColor = isDarkMode ? '#333333' : '#ffffff';
 
-        characters.split('').forEach((char, index) => {
-            const charContainer = document.createElement('div');
-            charContainer.style.display = 'inline-block';
-            charContainer.style.margin = '10px';
-            container.appendChild(charContainer);
 
-            const targetId = `char-${index}`;
-            const charElement = document.createElement('div');
-            charElement.id = targetId;
-            charElement.style.width = '100px';
-            charElement.style.height = '100px';
-            charContainer.appendChild(charElement);
-
-            HanziWriter.loadCharacterData(char).then(function (charData) {
-                const writer = HanziWriter.create(targetId, char, {
-                    width: 100,
-                    height: 100,
-                    padding: 5,
-                    strokeAnimationSpeed: 1, // Adjust speed as needed
-                    delayBetweenStrokes: 50, // Adjust delay as needed
-                    strokeColor: strokeColor,
-                    outlineColor: outlineColor,
-                });
-
-                // Add animation controls
-                const animateButton = document.createElement('button');
-                animateButton.textContent = 'Animate';
-                animateButton.onclick = () => writer.animateCharacter();
-                charContainer.appendChild(animateButton);
-
-                const quizButton = document.createElement('button');
-                quizButton.textContent = 'Quiz';
-                quizButton.onclick = () => writer.quiz();
-                charContainer.appendChild(quizButton);
-
-            }).catch(error => {
-                console.error(`Failed to load char data for ${char}:`, error);
-                const errorMessage = document.createElement('p');
-                errorMessage.innerText = `Stroke order data not available for ${char}.`;
-                charContainer.appendChild(errorMessage);
-            });
-        });
-    }
-</script>
 <script>
     function toggleFavoriteMindmap(wordId) {
         const button = document.getElementById('favorite-button');
