@@ -15,17 +15,21 @@ Chinese Learning Platform is a web application for learning the Chinese language
 - **Interactive Flashcards**: Flashcards provide exercises to test pinyin, character recognition, and word meanings.
 - **Character Stroke Order Modal**: Clicking on a character opens a modal window showing the stroke order, helping users learn proper writing techniques.
 - **Word Detail Pages**: Each word has a dedicated page, offering example sentences and translations for deeper understanding.
+- **Interactive Mind Maps**: Visualize connections between words using mind maps, with each HSK level represented by a unique color. From the mind map, users can:
+  - Add words to their favorites.
+  - View word translations.
+  - Access a list of example sentences, which mirrors the information available on the word's dictionary page.
 
 ## Usage
 
-1. **User Registration**: Go to the registration page to create a new account.
-2. **Authentication**: Log in to access and manage your personalized word decks.
-3. **Deck Creation**: Create your first word deck and start adding words to organize your learning materials.
-4. **Review Words**: Use interactive flashcards to review and test your knowledge on the words in your deck.
-5. **Filter by HSK Level**: Filter words to study based on your current HSK level for targeted learning.
-6. **Track Your Progress**: Monitor your learning progress and review which words need more attention based on your progress.
-7. **Stroke Order Learning**: Click on a character in the word list or word detail page to see a modal showing the stroke order for writing the character correctly.
-8. **Explore Word Pages**: Each word has a detailed page with example sentences, translations, and context to help you understand it fully.
+1. **User Registration**: Create an account on the registration page.
+2. **Authentication**: Log in to manage personalized word decks and track progress.
+3. **Deck Creation**: Create custom decks to organize words and phrases for study.
+4. **Review Words**: Use interactive flashcards for reviewing and testing your knowledge of words in the deck.
+5. **Filter by HSK Level**: Study words filtered by HSK level to target your learning.
+6. **Track Progress**: Monitor which words you’ve mastered and identify those that need more revision.
+7. **Stroke Order Learning**: View stroke order animations for characters by clicking on them in the word list or detail page.
+8. **Mind Maps**: Explore word connections visually via mind maps, color-coded by HSK level, and access options to add words to favorites, view translations, or see sentence examples.
 
 
 ## Technologies
@@ -37,8 +41,8 @@ Chinese Learning Platform is a web application for learning the Chinese language
 
 ## Future Enhancements
 
-In upcoming versions, I plan to introduce the following features:
+In future releases, the following features will be introduced:
 
-- **Interactive Mind Maps**: Enhance the user experience by incorporating interactive mind maps that visually represent connections between words and their meanings. This feature will facilitate better understanding and retention of vocabulary.
+- **Expanded Interactive Exercises**: Additional exercises for character recognition and sentence construction.
 
 Previously, the project was implemented using Flask, but due to the desire to add new features, it was decided to transition to Django.
