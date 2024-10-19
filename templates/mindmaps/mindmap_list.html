@@ -4,9 +4,9 @@
     <ul>
         {% for mindmap in mindmaps %}
             <li>
-                <a href="{% url 'mindmap-detail' mindmap.id %}">{{ mindmap.title }}</a>
+                <a href="{% url 'mindmaps:mindmap-detail' mindmap.id %}">{{ mindmap.title }}</a>
             </li>
         {% endfor %}
     </ul>
-    <a href="{% url 'mindmap-create' %}">Create new Mind Map</a>
+<!--    <a href="{% url 'mindmaps:mindmap-create' %}">Create new Mind Map</a>-->
 {% endblock %}

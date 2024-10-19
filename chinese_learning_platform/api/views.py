@@ -17,7 +17,6 @@ class DeckPerformanceViewSet(viewsets.ModelViewSet):
     queryset = DeckPerformance.objects.all()
     serializer_class = DeckPerformanceSerializer
     authentication_classes = [SessionAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         print("Received data:", self.request.data)
@@ -37,7 +36,6 @@ class WordPerformanceViewSet(viewsets.ModelViewSet):
     queryset = WordPerformance.objects.all()
     serializer_class = WordPerformanceSerializer
     authentication_classes = [SessionAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -64,6 +62,7 @@ class WordPerformanceViewSet(viewsets.ModelViewSet):
 class MindMapViewSet(viewsets.ModelViewSet):
     queryset = MindMap.objects.all()
     serializer_class = MindMapSerializer
+    permission_classes = []
 
 
 class ChineseWordViewSet(viewsets.ModelViewSet):
@@ -182,13 +181,13 @@ from .serializers import ChineseWordFavoriteSerializer
 class ChineseWordFavoriteView(generics.UpdateAPIView):
     queryset = ChineseWord.objects.all()
     serializer_class = ChineseWordFavoriteSerializer
-    permission_classes = [IsAuthenticated]
+
 
     def perform_update(self, serializer):
         serializer.update(serializer.instance, {'user': self.request.user})
 
 class ChineseWordFavoriteStatusView(APIView):
-    permission_classes = [IsAuthenticated]
+
     def get(self, request, word_id):
         try:
             word = ChineseWord.objects.get(id=word_id)
