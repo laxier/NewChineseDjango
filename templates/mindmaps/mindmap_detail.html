@@ -13,7 +13,8 @@
     </div>
     <div class="col-md-11">
         <h2>{{ mindmap.title }}</h2>
-        <p>This mind map illustrates the relationships between different Chinese words related to '{{ mindmap.title }}'.</p>
+        <p>This mind map illustrates the relationships between different Chinese words related to '{{ mindmap.title
+            }}'.</p>
         <p>Click on the nodes to explore their meanings and pinyin.</p>
     </div>
 </div>
@@ -79,16 +80,31 @@
                     }
                 }
 
+// Define color scheme for HSK levels
+                const hskColorScheme = {
+                    1: '#FFA500', // Orange
+                    2: '#4682B4', // Steel Blue
+                    3: '#FF6347', // Tomato
+                    4: '#B22222', // Fire Brick
+                    5: '#000080', // Navy
+                    6: '#4B0082'  // Indigo
+                };
+
+// Function to get color based on HSK level
+                function getColorByHskLevel(level) {
+                    return hskColorScheme[level] || '#808080'; // Default to gray if level not found
+                }
+
+// Modify the node creation code
                 nodes.push({
                     id: word.id,
                     label: `${word.simplified}`,
                     shape: 'box',
                     color: {
-                        background: '#FF6F61',
+                        background: getColorByHskLevel(word.hsk_level),
                         border: '#333'
                     },
-                    font: {color: 'black', size: 16},
-                    title: `${word.pinyin}\n${word.meaning}`,
+                    font: {color: 'black', size: 22},
                     level: level,
                     x: x,
                     y: y,
@@ -113,7 +129,7 @@
                 shape: 'box',
                 color: {
                     background: '#ffffff',
-                    border: '#000000'
+                    border: '#ffffff'
                 },
                 font: {color: 'black', size: 20},
                 level: 0,

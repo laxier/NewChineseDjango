@@ -15,11 +15,12 @@ class WordInMindMapSerializer(serializers.ModelSerializer):
     traditional = serializers.CharField(source='word.traditional')
     pinyin = serializers.CharField(source='word.pinyin')
     meaning = serializers.CharField(source='word.meaning')
+    hsk_level = serializers.CharField(source='word.hsk_level')
     children = serializers.SerializerMethodField()
 
     class Meta:
         model = WordInMindMap
-        fields = ['id', 'simplified', 'traditional', 'pinyin', 'meaning', 'children']
+        fields = ['id', 'simplified', 'traditional', 'pinyin', 'meaning', 'children', 'hsk_level']
 
     def get_children(self, obj):
         # Only return children if there are any
