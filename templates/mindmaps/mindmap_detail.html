@@ -5,11 +5,19 @@
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
 
-<div class="info">
-    <h2>{{ mindmap.title }}</h2>
-    <p>This mind map illustrates the relationships between different Chinese words related to '{{ mindmap.title }}'.</p>
-    <p>Click on the nodes to explore their meanings and pinyin.</p>
+<div class="row">
+    <div class="col-md-1">
+        <a href="{% url 'mindmaps:mindmap-list' %}" class="btn btn-secondary">
+            Back
+        </a>
+    </div>
+    <div class="col-md-11">
+        <h2>{{ mindmap.title }}</h2>
+        <p>This mind map illustrates the relationships between different Chinese words related to '{{ mindmap.title }}'.</p>
+        <p>Click on the nodes to explore their meanings and pinyin.</p>
+    </div>
 </div>
+
 
 <div class="row">
     <!-- Mind Map on the left (col-md-8 for larger width) -->
