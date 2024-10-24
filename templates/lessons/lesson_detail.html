@@ -13,6 +13,17 @@
         <a href="{% url 'lessons:readingtext_list' lesson.id %}" class="btn btn-primary mb-3">Reading Texts</a>
         <a href="{% url 'lessons:homework_list' lesson.id %}" class="btn btn-success mb-3">Manage Homework</a>
     </div>
+    {% if lesson.lesson_file %}
+    <div class="pdf-section">
+        <h4>Lesson PDF</h4>
+        <!-- Ссылка на открытие PDF-файла в новом окне -->
+        <a href="{{ lesson.lesson_file.url }}" target="_blank">
+            Open PDF
+        </a>
+    </div>
+    {% else %}
+    <p>No PDF available for this lesson.</p>
+    {% endif %}
 
     <!-- Reading Texts Section -->
     {% include 'lessons/includes/reading_texts.html' with reading_texts=reading_texts %}

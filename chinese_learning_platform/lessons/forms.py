@@ -6,7 +6,7 @@ from users.models import Deck
 class LessonForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ['title', 'description', 'decks', 'words', 'supplementary_words', 'words_for_understanding']
+        fields = ['title', 'description', 'decks', 'words', 'supplementary_words', 'words_for_understanding', 'lesson_file']
         widgets = {
             'decks': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-decks'}),
             'words': forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'searchable-words'}),
