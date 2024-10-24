@@ -9,5 +9,13 @@ class LexicalExerciseSerializer(serializers.ModelSerializer):
         fields = ['id', 'text', 'audio_file', 'children']
 
     def get_children(self, instance):
-        return LexicalExerciseSerializer(instance.children.filter(children__isnull=True), many=True).data
+        """
+        Получает дочерние элементы из предзагруженных данных
+        """
+        if hasattr(instance, '_prefetched_children'):
+            return LexicalExerciseSerializer(
+                instance._prefetched_children,
+                many=True
+            ).data
+        return []
 

@@ -67,7 +67,7 @@ class LessonListView(ListView):
 
 
 from .serializers import LexicalExerciseSerializer
-
+from django.db.models import Prefetch
 
 class LessonDetailView(DetailView):
     model = Lesson
@@ -75,19 +75,52 @@ class LessonDetailView(DetailView):
     context_object_name = 'lesson'
     pk_url_kwarg = 'lesson_id'
 
+    def get_queryset(self):
+        # Оптимизируем загрузку иерархии упражнений
+        lexical_exercises_prefetch = Prefetch(
+            'lexical_exercises',
+            queryset=LexicalExercise.objects
+            .filter(parent__isnull=True)
+            .prefetch_related(
+                Prefetch(
+                    'children',
+                    queryset=LexicalExercise.objects.select_related('parent'),
+                    to_attr='_prefetched_children'
+                )
+            ),
+            to_attr='_prefetched_exercises'
+        )
+
+        # Оптимизируем загрузку всех связанных данных
+        return (Lesson.objects
+        .select_related()  # если есть прямые ForeignKey связи
+        .prefetch_related(
+            'reading_texts',
+            'words',
+            'supplementary_words',
+            'words_for_understanding',
+            'decks',
+            lexical_exercises_prefetch
+        ))
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['reading_texts'] = self.object.reading_texts.all()
-        context['primary_words'] = self.object.words.all()
-        context['supplementary_words'] = self.object.supplementary_words.all()
-        context['understanding_words'] = self.object.words_for_understanding.all()
 
-        context['decks'] = self.object.decks.all()
-        exercises = self.object.lexical_exercises.all()
-        serialized_exercises = [LexicalExerciseSerializer(exercise).data for exercise in exercises if
-                                exercise.parent == None]
-        context['lexical_exercises'] = serialized_exercises
+        # Используем предзагруженные данные
+        context.update({
+            'reading_texts': self.object.reading_texts.all(),
+            'primary_words': self.object.words.all(),
+            'supplementary_words': self.object.supplementary_words.all(),
+            'understanding_words': self.object.words_for_understanding.all(),
+            'decks': self.object.decks.all(),
+            'lexical_exercises': LexicalExerciseSerializer(
+                getattr(self.object, '_prefetched_exercises', []),
+                many=True
+            ).data
+        })
+
         return context
+
 
 class LessonCreateView(SuperuserRequiredMixin, CreateView):
     model = Lesson
