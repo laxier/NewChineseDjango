@@ -18,7 +18,7 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
 # Константы
-OUTPUT_PREFIX = "他们请他做什么"  # Префикс для названий выходных файлов
+OUTPUT_PREFIX = "L32_4_Text_for_reading"  # Префикс для названий выходных файлов
 
 # Global variables
 audio = None
@@ -186,7 +186,7 @@ def main():
 
 if __name__ == "__main__":
     # Load audio file
-    audio_file = "L32_3_Lexical_exercises.mp3"  # Replace with your audio file
+    audio_file = "L32_4_Text_for_reading.mp3"  # Replace with your audio file
     load_audio(audio_file)
 
     main()
