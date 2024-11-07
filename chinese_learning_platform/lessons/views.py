@@ -7,12 +7,15 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden
 
+
 class SuperuserRequiredMixin:
     """Mixin to ensure that only superusers can access the view."""
+
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_superuser:
             return HttpResponseForbidden("You do not have permission to access this view.")
         return super().dispatch(request, *args, **kwargs)
+
 
 class LessonContextMixin:
     def get_context_data(self, **kwargs):
@@ -64,10 +67,12 @@ class LessonListView(ListView):
     model = Lesson
     template_name = 'lessons/lesson_list.html'
     context_object_name = 'lessons'
+    ordering = ['-created_at']
 
 
 from .serializers import LexicalExerciseSerializer
 from django.db.models import Prefetch
+
 
 class LessonDetailView(DetailView):
     model = Lesson
@@ -150,15 +155,14 @@ class ReadingTextCreateView(SuperuserRequiredMixin, LessonRelatedCreateView):
     template_name = 'lessons/add_reading_text.html'
 
 
-class HomeworkListView(LessonRelatedListView):
+class HomeworkListView(LoginRequiredMixin, LessonRelatedListView):
     model = Homework
     template_name = 'lessons/homework_list.html'
     context_object_name = 'homeworks'
 
     def get_queryset(self):
         user = self.request.user
-        return super().get_queryset().filter(user=user)
-
+        return super().get_queryset().filter(user=user).order_by('-created_at')
 
 
 class HomeworkCreateView(LessonRelatedCreateView, LoginRequiredMixin):
