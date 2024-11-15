@@ -18,7 +18,7 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
 # Константы
-OUTPUT_PREFIX = "L32_4_Text_for_reading"  # Префикс для названий выходных файлов
+# OUTPUT_PREFIX = "L33_现在几点了"  # Префикс для названий выходных файлов
 
 # Global variables
 audio = None
@@ -186,7 +186,9 @@ def main():
 
 if __name__ == "__main__":
     # Load audio file
-    audio_file = "L32_4_Text_for_reading.mp3"  # Replace with your audio file
+    # markers = [13.21, 30.04, 42.66]
+    OUTPUT_PREFIX = "L33_"+"下午你们从几"
+    audio_file = "L33_3_Lexical_exercises6.mp3"  # Replace with your audio file
     load_audio(audio_file)
 
     main()
