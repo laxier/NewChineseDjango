@@ -4,6 +4,10 @@
 <input type="hidden" id="user-id" value="{{ current_user.id }}">
 <div class="container">
     <h1>Тема: <a href="/deck/{{ deck.id }}">{{ deck.name }}</a></h1>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="togglePinyin">
+        <label class="form-check-label" for="togglePinyin">Показывать пиньин на карточке с ответом</label>
+    </div>
     {% if to_test %}
     {% include "includes/flashcard.html" %}
 
@@ -26,6 +30,7 @@
         let currentFlashcardIndex = 0;
         let countRight = 0;
         let isQuizEnding = false;
+        let isFrontVisible = true; // Переменная для отслеживания текущей стороны карточки
 
         displayFlashcard(currentFlashcardIndex);
 
@@ -36,23 +41,72 @@
             toggleFlashcard();
         });
 
+        const togglePinyin = document.getElementById("togglePinyin");
+        let showPinyinOnAnswer = true; // По умолчанию показываем пиньин на ответе
+
+        // Обработчик для переключателя
+        togglePinyin.addEventListener("change", function () {
+            showPinyinOnAnswer = togglePinyin.checked;
+            displayFlashcard(currentFlashcardIndex, true); // Обновляем текущую карточку
+        });
+
         function toggleFlashcard() {
+            isFrontVisible = !isFrontVisible;
             var front = document.querySelector('#flashcard .front');
             var back = document.querySelector('#flashcard .back');
             front.style.display = (front.style.display === "none") ? "flex" : "none";
             back.style.display = (back.style.display === "none") ? "flex" : "none";
         }
 
-        function displayFlashcard(index) {
-            var front = document.querySelector('#flashcard .front');
-            var back = document.querySelector('#flashcard .back');
-            front.style.display = "flex";
-            back.style.display = "none";
+        function displayFlashcard(index, keepSide = false) {
+            const front = document.querySelector('#flashcard .front');
+            const back = document.querySelector('#flashcard .back');
+            const togglePinyin = document.getElementById("togglePinyin");
             const currentRow = Rows[index];
 
-            document.getElementById("front-character").textContent = currentRow.querySelector('.simplified').textContent;
-            document.getElementById("back-pronunciation").textContent = currentRow.querySelector('.pinyin').textContent;
-            document.getElementById("back-translation").textContent = currentRow.querySelector('.meaning').textContent;
+            // Показываем переднюю сторону по умолчанию
+            front.style.display = "flex";
+            back.style.display = "none";
+
+            // Получаем данные текущей строки
+            const simplified = currentRow.querySelector('.simplified')?.textContent || "";
+            const pinyin = currentRow.querySelector('.pinyin')?.textContent || "";
+            const meaning = currentRow.querySelector('.meaning')?.textContent || "";
+
+            // Логика переключателя
+            if (togglePinyin.checked) {
+                // Pinyin on the back
+                document.getElementById("front-pinyin").textContent = ""; // Clear Pinyin on the front
+                document.getElementById("front-translation").textContent = meaning;
+
+                document.getElementById("back-character").textContent = simplified; // Show character on the back
+                document.getElementById("back-pinyin").textContent = pinyin; // Show Pinyin on the back
+            } else {
+                // Pinyin on the front
+                document.getElementById("front-pinyin").textContent = pinyin; // Show Pinyin and character on the front
+                document.getElementById("front-translation").textContent = meaning;
+
+                document.getElementById("back-character").textContent = simplified; // Show character on the back
+                document.getElementById("back-pinyin").textContent = ""; // Clear Pinyin on the back
+            }
+            // Сохраняем текущую сторону, если нужно
+            if (keepSide) {
+                // updateFlashcardSide(isFrontVisible);
+                const front = document.querySelector('#flashcard .front');
+                const back = document.querySelector('#flashcard .back');
+
+                if (isFrontVisible) {
+                    front.style.display = "flex";
+                    back.style.display = "none";
+                } else {
+                    front.style.display = "none";
+                    back.style.display = "flex";
+                }
+            } else {
+                isFrontVisible = true; // По умолчанию показываем переднюю сторону
+                front.style.display = "flex";
+                back.style.display = "none";
+            }
         }
 
         function getNextFlashcard() {
@@ -142,6 +196,7 @@
                     console.error('Error:', error);
                 });
         }
-    });
+    })
+    ;
 </script>
 {% endblock %}
