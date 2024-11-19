@@ -4,10 +4,7 @@
 <input type="hidden" id="user-id" value="{{ current_user.id }}">
 <div class="container">
     <h1>Тема: <a href="/deck/{{ deck.id }}">{{ deck.name }}</a></h1>
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="togglePinyin">
-        <label class="form-check-label" for="togglePinyin">Показывать пиньин на карточке с ответом</label>
-    </div>
+
     {% if to_test %}
     {% include "includes/flashcard.html" %}
 
