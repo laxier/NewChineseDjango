@@ -33,17 +33,37 @@ class ChineseWord(models.Model):
 
 def searchWord(word):
     url = f'https://www.trainchinese.com/v2/search.php?searchWord={word}&rAp=0&height=0&width=0&tcLanguage=ru'
-    response = requests.get(url)
 
-    if response.status_code == 200:
-        # Parse the page content using BeautifulSoup
-        soup = BeautifulSoup(response.content, 'html.parser')
+    try:
+        response = requests.get(url, timeout=10, verify='./certs/trainchinese.crt')
+        # Дата выдачи	вторник, 19 ноября 2024г. в 03:00:00
+        # Срок действия	вторник, 25 ноября 2025г. в 02:59:59
+        response.raise_for_status()
 
-        rows = soup.find_all('tr')
-        cells = rows[0].find_all('div')  # Assuming the text is in divs within the table rows
-        if cells and len(cells) > 2:
-            pinyin = cells[1].text.strip()
-            meaning = cells[2].text.replace("\"", "").strip()
-            return pinyin, meaning
-    return None, None
+        if response.status_code == 200:
+            # Парсим контент страницы
+            soup = BeautifulSoup(response.content, 'html.parser')
+
+            # Ищем строки таблицы
+            rows = soup.find_all('tr')
+            if not rows or len(rows) == 0:
+                print("No table rows found.")
+                return None, None
+
+            # Ищем нужные элементы в первой строке
+            cells = rows[0].find_all('div')
+            if cells and len(cells) > 2:
+                pinyin = cells[1].text.strip()
+                meaning = cells[2].text.replace("\"", "").strip()
+                return pinyin, meaning
+            else:
+                print("Expected data not found in the table cells.")
+                return None, None
+        else:
+            print(f"Unexpected status code: {response.status_code}")
+            return None, None
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching word details: {e}")
+        return None, None
 
