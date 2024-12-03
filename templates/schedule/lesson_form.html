@@ -3,8 +3,11 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>{% if object %}Edit{% else %}Create{% endif %} {{ model_name }}</h2>
-    <a href="{% url 'schedule:homework_create' %}" class="btn btn-primary">Add Homework</a>
+    <h2>{% if object %}Edit Lesson{% else %}Create Lesson{% endif %}</h2>
+    {% if object %}
+        <!-- Показать кнопку только если урок уже существует (редактирование) -->
+        <a href="{% url 'schedule:homework_create_from_lesson' object.id %}" class="btn btn-primary">Add Homework for this Lesson</a>
+    {% endif %}
 </div>
 
 <form method="post">

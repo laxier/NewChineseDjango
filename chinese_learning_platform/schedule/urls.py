@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     LessonListView, HomeworkListView,
     LessonCreateView, LessonUpdateView, LessonDeleteView,
-    HomeworkCreateView, HomeworkUpdateView, HomeworkDeleteView,
+    HomeworkCreateView, HomeworkUpdateView, HomeworkDeleteView, add_homework_for_lesson,
     CalendarView, LessonEventsView
 )
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path('lessons/', LessonListView.as_view(), name='lesson_list'),
     path('lessons/create/', LessonCreateView.as_view(), name='lesson_create'),
     path('lessons/<int:pk>/edit/', LessonUpdateView.as_view(), name='lesson_update'),
+    path('homework/add-for-lesson/<int:lesson_id>/', add_homework_for_lesson, name='homework_create_from_lesson'),
     path('lessons/<int:pk>/delete/', LessonDeleteView.as_view(), name='lesson_delete'),
 
     # Домашние задания

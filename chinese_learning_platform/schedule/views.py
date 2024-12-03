@@ -8,6 +8,7 @@ from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.utils.timezone import now
 
+
 class CalendarView(TemplateView):
     template_name = "schedule/calendar.html"
 
@@ -71,7 +72,15 @@ class LessonCreateView(CreateView):
     template_name = "schedule/lesson_form.html"
     success_url = reverse_lazy('schedule:calendar')
 
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.request.user.is_authenticated:
+            initial['user'] = self.request.user
+        return initial
+
     def form_valid(self, form):
+        form.instance.user = self.request.user
+        print("Form is being saved for user:", self.request.user)
         return super().form_valid(form)
 
 
@@ -81,6 +90,17 @@ class LessonUpdateView(UpdateView):
     form_class = LessonForm
     template_name = "schedule/lesson_form.html"
     success_url = reverse_lazy('schedule:calendar')
+
+
+# views.py
+from django.shortcuts import redirect, get_object_or_404
+from .models import Lesson
+
+
+def add_homework_for_lesson(request, lesson_id):
+    lesson = get_object_or_404(Lesson, pk=lesson_id)
+    request.session['current_lesson_id'] = lesson_id  # Сохраняем lesson_id в сессию
+    return redirect('schedule:homework_create')  # Перенаправляем на форму создания домашнего задания
 
 
 # Удаление урока
@@ -111,8 +131,24 @@ class HomeworkCreateView(CreateView):
     template_name = "schedule/homework_form.html"
     success_url = reverse_lazy('schedule:calendar')
 
-    def form_valid(self, form):
-        return super().form_valid(form)
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.request.user.is_authenticated:
+            initial['user'] = self.request.user
+        lesson_id = self.request.session.get('current_lesson_id')
+        if lesson_id:
+            lesson = get_object_or_404(Lesson, pk=lesson_id)
+            initial['lesson'] = lesson
+            if lesson.date:
+                initial['due_date'] = lesson.date.date()
+        return initial
+
+
+def form_valid(self, form):
+    form.instance.user = self.request.user
+    if 'current_lesson_id' in self.request.session:
+        del self.request.session['current_lesson_id']
+    return super().form_valid(form)
 
 
 class HomeworkUpdateView(UpdateView):
