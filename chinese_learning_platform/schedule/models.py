@@ -9,7 +9,7 @@ class Lesson(models.Model):
     number = models.PositiveIntegerField("Номер урока")
     title = models.CharField("Название урока", max_length=255)
     description = models.TextField("Описание", blank=True, null=True)
-    date = models.DateField("Дата проведения", default=now)
+    date = models.DateField("Дата проведения")
 
     def __str__(self):
         return f"Урок {self.number}: {self.title} (Дата: {self.date}, Пользователь: {self.user.username})"

@@ -4,6 +4,7 @@ from .views import (
     LessonCreateView, LessonUpdateView, LessonDeleteView,
     HomeworkCreateView, HomeworkUpdateView, HomeworkDeleteView
 )
+app_name = 'schedule'
 
 urlpatterns = [
     # Уроки

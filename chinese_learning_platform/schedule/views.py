@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Lesson, Homework
+from .forms import LessonForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView
@@ -14,7 +15,7 @@ class LessonListView(LoginRequiredMixin, ListView):
 
 class LessonCreateView(CreateView):
     model = Lesson
-    fields = ['user', 'number', 'title', 'description', 'date']
+    form_class = LessonForm
     template_name = "schedule/lesson_form.html"
     success_url = reverse_lazy('lesson_list')
 
@@ -25,7 +26,7 @@ class LessonCreateView(CreateView):
 # Редактирование урока
 class LessonUpdateView(UpdateView):
     model = Lesson
-    fields = ['user', 'number', 'title', 'description', 'date']
+    form_class = LessonForm
     template_name = "schedule/lesson_form.html"
     success_url = reverse_lazy('lesson_list')
 

@@ -7,14 +7,14 @@
 <ul>
     {% for lesson in lessons %}
         <li>
-            <a href="{% url 'homework_list' lesson.pk %}">
+            <a href="{% url 'schedule:homework_list' lesson.pk %}">
                 Lesson {{ lesson.number }}: {{ lesson.title }} ({{ lesson.date }})
             </a>
-            <a href="{% url 'lesson_update' lesson.pk %}" class="btn btn-sm btn-warning">Edit</a>
-            <a href="{% url 'lesson_delete' lesson.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            <a href="{% url 'schedule:lesson_update' lesson.pk %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'schedule:lesson_delete' lesson.pk %}" class="btn btn-sm btn-danger">Delete</a>
         </li>
     {% endfor %}
 </ul>
 
-<a href="{% url 'lesson_create' %}" class="btn btn-primary">Add Lesson</a>
+<a href="{% url 'schedule:lesson_create' %}" class="btn btn-primary">Add Lesson</a>
 {% endblock %}
