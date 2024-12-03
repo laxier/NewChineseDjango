@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView
 from django.views.generic import TemplateView
 from django.http import JsonResponse
+from django.utils.timezone import now
 
 class CalendarView(TemplateView):
     template_name = "schedule/calendar.html"
@@ -18,6 +19,7 @@ class CalendarView(TemplateView):
 
 class LessonEventsView(TemplateView):
     """Provides JSON data for calendar events, including lessons and homeworks."""
+
     def get(self, request, *args, **kwargs):
         # Fetch all lessons
         lessons = Lesson.objects.all()
@@ -38,7 +40,13 @@ class LessonEventsView(TemplateView):
                 "title": f"ДЗ: {homework.title}",
                 "start": homework.due_date.strftime("%Y-%m-%d"),
                 "url": f"/schedule/homeworks/{homework.pk}/edit/",
-                "color": "#dc3545",  # Red color for homeworks
+                "color": (
+                    "#28a745"  # Green for completed
+                    if homework.is_completed
+                    else "#dc3545"  # Red for overdue
+                    if now().date() > homework.due_date
+                    else "#ffc107"  # Yellow for pending
+                ),
             }
             for homework in homeworks
         ]
@@ -48,7 +56,6 @@ class LessonEventsView(TemplateView):
         return JsonResponse(events, safe=False)
 
 
-
 class LessonListView(LoginRequiredMixin, ListView):
     model = Lesson
     template_name = "schedule/lesson_list.html"
@@ -56,6 +63,7 @@ class LessonListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Lesson.objects.filter(user=self.request.user).order_by('date')
+
 
 class LessonCreateView(CreateView):
     model = Lesson
@@ -95,6 +103,7 @@ class HomeworkListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['lesson'] = get_object_or_404(Lesson, pk=self.kwargs['pk'], user=self.request.user)
         return context
+
 
 class HomeworkCreateView(CreateView):
     model = Homework
