@@ -2,11 +2,16 @@ from django.urls import path
 from .views import (
     LessonListView, HomeworkListView,
     LessonCreateView, LessonUpdateView, LessonDeleteView,
-    HomeworkCreateView, HomeworkUpdateView, HomeworkDeleteView
+    HomeworkCreateView, HomeworkUpdateView, HomeworkDeleteView,
+    CalendarView, LessonEventsView
 )
+
 app_name = 'schedule'
 
 urlpatterns = [
+    path('calendar/', CalendarView.as_view(), name='calendar'),
+    path('calendar/events/', LessonEventsView.as_view(), name='calendar_events'),
+
     # Уроки
     path('lessons/', LessonListView.as_view(), name='lesson_list'),
     path('lessons/create/', LessonCreateView.as_view(), name='lesson_create'),

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block head %}
+<!--&lt;!&ndash; FullCalendar CSS &ndash;&gt;-->
+<!--<link href="https://cdn.jsdelivr.net/npm/fullcalendar/main.min.css" rel="stylesheet">-->
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
+{% endblock %}
+
+{% block title %}Calendar{% endblock %}
+
+{% block content %}
+<div id="calendar"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                start: 'prev,next today',
+                center: 'title',
+                end: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: '/schedule/calendar/events/',  // URL для загрузки событий
+            eventClick: function (info) {
+                window.location.href = info.event.url;
+            },
+        });
+        calendar.render();
+    });
+</script>
+{% endblock %}
