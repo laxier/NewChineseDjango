@@ -19,6 +19,8 @@ Chinese Learning Platform is a web application for learning the Chinese language
   - Add words to their favorites.
   - View word translations.
   - Access a list of example sentences, which mirrors the information available on the word's dictionary page.
+- **Interactive Mind Maps**: Visualize connections between words using mind maps, with each HSK level represented by a unique color. From the mind map, users can:
+- **Study Calendar**: Plan and schedule study sessions using the integrated calendar. Set reminders for word review sessions and track upcoming learning activities.
 
 ## Usage
 
@@ -30,6 +32,7 @@ Chinese Learning Platform is a web application for learning the Chinese language
 6. **Track Progress**: Monitor which words you’ve mastered and identify those that need more revision.
 7. **Stroke Order Learning**: View stroke order animations for characters by clicking on them in the word list or detail page.
 8. **Mind Maps**: Explore word connections visually via mind maps, color-coded by HSK level, and access options to add words to favorites, view translations, or see sentence examples.
+9. **Calendar Management**: Use the calendar to schedule personalized study sessions, set reminders for reviews, and keep track of your daily learning tasks.
 
 
 ## Technologies
@@ -44,5 +47,6 @@ Chinese Learning Platform is a web application for learning the Chinese language
 In future releases, the following features will be introduced:
 
 - **Expanded Interactive Exercises**: Additional exercises for character recognition and sentence construction.
+- **Enhanced Calendar Features**: Advanced scheduling options to better plan and manage study sessions based on user progress and upcoming tests.
 
 Previously, the project was implemented using Flask, but due to the desire to add new features, it was decided to transition to Django.
