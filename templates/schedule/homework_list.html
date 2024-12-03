@@ -17,9 +17,12 @@
                 On Time
             {% endif %} |
             Grade: {{ homework.grade|default:"Not graded" }}
+            <a href="{% url 'homework_update' homework.pk %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'homework_delete' homework.pk %}" class="btn btn-sm btn-danger">Delete</a>
         </li>
     {% endfor %}
 </ul>
 
-<a href="{% url 'lesson_list' %}">Back to Lessons</a>
+<a href="{% url 'homework_create' %}?lesson_id={{ lesson.pk }}" class="btn btn-primary">Add Homework</a>
+<a href="{% url 'lesson_list' %}" class="btn btn-secondary">Back to Lessons</a>
 {% endblock %}

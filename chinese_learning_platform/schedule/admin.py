@@ -22,7 +22,7 @@ class HomeworkAdmin(admin.ModelAdmin):
     )
     list_filter = ('user', 'is_completed', 'due_date')
     search_fields = ('lesson__title', 'user__username')
-    ordering = ('user', '-due_date')
+    ordering = ('user', '-is_completed', '-due_date')
 
     def is_overdue(self, obj):
         """Отображение просроченного статуса."""

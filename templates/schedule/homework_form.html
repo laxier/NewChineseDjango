@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<h2>{% if object %}Edit{% else %}Create{% endif %} {{ model_name }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button type="submit">Save</button>
+</form>
+
+<a href="{% url 'lesson_list' %}">Cancel</a>
+{% endblock %}
