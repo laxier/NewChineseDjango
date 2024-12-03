@@ -20,6 +20,8 @@
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
+            firstDay: 1,
+            // locale: 'ru',
             headerToolbar: {
                 start: 'prev,next today',
                 center: 'title',
