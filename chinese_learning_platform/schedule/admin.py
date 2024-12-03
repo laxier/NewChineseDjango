@@ -9,22 +9,20 @@ class LessonAdmin(admin.ModelAdmin):
     search_fields = ('title', 'number', 'user__username')
     ordering = ('user', 'number')
 
-
 @admin.register(Homework)
 class HomeworkAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'user',
-        'lesson',
         'assigned_date',
         'due_date',
         'is_completed',
         'grade',
         'is_overdue',
-    )  # Поля для отображения
-    list_filter = ('user', 'is_completed', 'due_date')  # Фильтры
-    search_fields = ('lesson__title', 'user__username')  # Поля для поиска
-    ordering = ('user', '-due_date')  # Сортировка по пользователю и дате сдачи
+    )
+    list_filter = ('user', 'is_completed', 'due_date')
+    search_fields = ('lesson__title', 'user__username')
+    ordering = ('user', '-due_date')
 
     def is_overdue(self, obj):
         """Отображение просроченного статуса."""

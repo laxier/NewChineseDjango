@@ -22,7 +22,13 @@ class Homework(models.Model):
         related_name='schedule_homeworks',
         verbose_name="Пользователь"
     )
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='homeworks', verbose_name="Урок")
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name='homeworks',
+        verbose_name="Урок"
+    )
+    title = models.CharField("Задание", max_length=255)
     assigned_date = models.DateField("Дата задания", default=now)
     due_date = models.DateField("Дата сдачи")
     is_completed = models.BooleanField("Выполнено", default=False)
