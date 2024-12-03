@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Homeworks for Lesson {{ lesson.number }}{% endblock %}
+
+{% block content %}
+<h2>Homeworks for Lesson {{ lesson.number }}: {{ lesson.title }}</h2>
+<p>Date: {{ lesson.date }}</p>
+
+<ul>
+    {% for homework in homeworks %}
+        <li>
+            Assigned: {{ homework.assigned_date }} |
+            Due: {{ homework.due_date }} |
+            {% if homework.is_overdue %}
+                <strong>Overdue!</strong>
+            {% else %}
+                On Time
+            {% endif %} |
+            Grade: {{ homework.grade|default:"Not graded" }}
+        </li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'lesson_list' %}">Back to Lessons</a>
+{% endblock %}
