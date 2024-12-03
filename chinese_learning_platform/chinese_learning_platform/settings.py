@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_bootstrap5',
     'lessons.apps.LessonsConfig',
+    'schedule.apps.ScheduleConfig',
 ]
 
 DEBUG_TOOLBAR_PANELS = [
