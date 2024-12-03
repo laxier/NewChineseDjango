@@ -25,8 +25,8 @@ class LessonEventsView(TemplateView):
         lessons = Lesson.objects.all()
         lesson_events = [
             {
-                "title": f"{lesson.title} {lesson.number}",
-                "start": lesson.date.strftime("%Y-%m-%d"),
+                "title": f"{lesson.title} 第{lesson.number}课",
+                "start": lesson.date.strftime("%Y-%m-%dT%H:%M:%S"),
                 "url": f"/schedule/lessons/{lesson.pk}/edit/",
                 "color": "#007bff",  # Blue color for lessons
             }
@@ -69,7 +69,7 @@ class LessonCreateView(CreateView):
     model = Lesson
     form_class = LessonForm
     template_name = "schedule/lesson_form.html"
-    success_url = reverse_lazy('schedule:lesson_list')
+    success_url = reverse_lazy('schedule:calendar')
 
     def form_valid(self, form):
         return super().form_valid(form)
@@ -80,14 +80,14 @@ class LessonUpdateView(UpdateView):
     model = Lesson
     form_class = LessonForm
     template_name = "schedule/lesson_form.html"
-    success_url = reverse_lazy('schedule:lesson_list')
+    success_url = reverse_lazy('schedule:calendar')
 
 
 # Удаление урока
 class LessonDeleteView(DeleteView):
     model = Lesson
     template_name = "schedule/lesson_confirm_delete.html"
-    success_url = reverse_lazy('schedule:lesson_list')
+    success_url = reverse_lazy('schedule:calendar')
 
 
 class HomeworkListView(LoginRequiredMixin, ListView):
@@ -109,7 +109,7 @@ class HomeworkCreateView(CreateView):
     model = Homework
     fields = ['user', 'lesson', 'title', 'assigned_date', 'due_date', 'is_completed', 'grade']
     template_name = "schedule/homework_form.html"
-    success_url = reverse_lazy('schedule:lesson_list')
+    success_url = reverse_lazy('schedule:calendar')
 
     def form_valid(self, form):
         return super().form_valid(form)
@@ -119,10 +119,10 @@ class HomeworkUpdateView(UpdateView):
     model = Homework
     fields = ['user', 'lesson', 'title', 'assigned_date', 'due_date', 'is_completed', 'grade']
     template_name = "schedule/homework_form.html"
-    success_url = reverse_lazy('schedule:lesson_list')
+    success_url = reverse_lazy('schedule:calendar')
 
 
 class HomeworkDeleteView(DeleteView):
     model = Homework
     template_name = "schedule/homework_confirm_delete.html"
-    success_url = reverse_lazy('schedule:lesson_list')
+    success_url = reverse_lazy('schedule:calendar')

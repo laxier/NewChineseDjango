@@ -1,14 +1,18 @@
 {% extends "base.html" %}
+
 {% block head %}
-<!--&lt;!&ndash; FullCalendar CSS &ndash;&gt;-->
-<!--<link href="https://cdn.jsdelivr.net/npm/fullcalendar/main.min.css" rel="stylesheet">-->
 <!-- FullCalendar JS -->
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js"></script>
 {% endblock %}
 
 {% block title %}Calendar{% endblock %}
 
 {% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <h2>Calendar</h2>
+    <a href="{% url 'schedule:lesson_create' %}" class="btn btn-primary">Add Lesson</a>
+</div>
+
 <div id="calendar"></div>
 
 <script>
@@ -21,7 +25,12 @@
                 center: 'title',
                 end: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            events: '/schedule/calendar/events/',  // URL для загрузки событий
+            events: '/schedule/calendar/events/',  // URL for fetching events
+            eventTimeFormat: { // Specify 24-hour time format
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            },
             eventClick: function (info) {
                 window.location.href = info.event.url;
             },
@@ -29,4 +38,5 @@
         calendar.render();
     });
 </script>
+
 {% endblock %}
