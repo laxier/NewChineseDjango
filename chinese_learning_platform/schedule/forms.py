@@ -1,5 +1,6 @@
 from django import forms
 from .models import Lesson
+from django.utils.timezone import now
 
 class LessonForm(forms.ModelForm):
     class Meta:
@@ -8,4 +9,7 @@ class LessonForm(forms.ModelForm):
         widgets = {
             'birthday': forms.DateInput(attrs={'type': 'date'})
         }
+
+    date = forms.DateTimeField(initial=now)
+
 
