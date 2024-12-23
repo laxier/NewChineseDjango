@@ -137,7 +137,8 @@ class EditDeckView(CurrentUserMixin, UpdateView):
         deck_word_instances = []  # List to hold DeckWord instances for bulk creation
 
         if new_words:
-            word_list = re.split(r'[,\uFF0C]', new_words)  # Split by both ',' and '，'
+            # Разделение строки по запятой, китайской запятой и табуляции
+            word_list = re.split(r'[,\uFF0C\t]', new_words)  # Split by both ',' '，' '\t'
             for simplified in map(str.strip, word_list):  # Strip whitespace
                 if simplified:
                     word, created = ChineseWord.objects.get_or_create(simplified=simplified)
