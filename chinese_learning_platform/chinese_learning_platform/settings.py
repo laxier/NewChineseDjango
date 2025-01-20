@@ -120,12 +120,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'chinese',  # Имя базы данных
-        'USER': 'root',  # Имя пользователя
+        'USER': 'postgres',  # Имя пользователя
         'PASSWORD': 'rootroot',  # Пароль пользователя
         'HOST': '127.0.0.1',  # Локальный хост или IP-адрес сервера
         'PORT': 5432,  # Стандартный порт PostgreSQL
         'OPTIONS': {
-            'sslmode': 'require',  # Для защищенного соединения
+            # 'sslmode': 'require',  # Для защищенного соединения
         },
     }
 }
