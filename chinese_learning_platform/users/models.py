@@ -67,8 +67,9 @@ class WordPerformance(models.Model):
 
     @cached_property
     def accuracy_percentage_display(self):
-        if self.repetitions > 0:
-            return round((self.right / (self.right + self.wrong)) * 100)
+        total_attempts = self.right + self.wrong
+        if total_attempts > 0:
+            return round((self.right / total_attempts) * 100)
         return 0
 
     def calculate_interval(self, repetitions, quality):
