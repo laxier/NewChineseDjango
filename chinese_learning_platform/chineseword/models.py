@@ -11,7 +11,12 @@ class ChineseWord(models.Model):
     pinyin = models.CharField(max_length=100, blank=True, null=True)
     meaning = models.TextField(blank=True, null=True)
     hsk_level = models.CharField(null=True, blank=True, max_length=10)
-    favorites = models.ManyToManyField(User, related_name='favorite_words', blank=True)
+    favorites = models.ManyToManyField(
+        User,
+        related_name='favorite_words',
+        blank=True,
+        through='ChineseWordFavorite'  # Указываем кастомное промежуточное имя
+    )
 
     class Meta:
         constraints = [
@@ -30,6 +35,19 @@ class ChineseWord(models.Model):
             if meaning:
                 self.meaning = meaning
         super().save(*args, **kwargs)
+
+
+class ChineseWordFavorite(models.Model):
+    chinese_word = models.ForeignKey(ChineseWord, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['chinese_word', 'user'],
+                name='chineseword_favorites_uniq'  # Устанавливаем короткое имя
+            ),
+        ]
 
 def searchWord(word):
     url = f'https://www.trainchinese.com/v2/search.php?searchWord={word}&rAp=0&height=0&width=0&tcLanguage=ru'

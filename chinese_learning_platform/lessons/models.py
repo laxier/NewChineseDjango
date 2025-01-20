@@ -17,14 +17,50 @@ class Lesson(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    decks = models.ManyToManyField(Deck, related_name='decks', blank=True)
-    words = models.ManyToManyField(ChineseWord, related_name='lessons', blank=True)
-    supplementary_words = models.ManyToManyField(ChineseWord, related_name='supplementary_lessons', blank=True)
-    words_for_understanding = models.ManyToManyField(ChineseWord, related_name='understanding_lessons', blank=True)
-    lesson_file = models.FileField(upload_to='lessons_files/', blank=True, null=True, validators=[validate_pdf])
+    decks = models.ManyToManyField(
+        Deck, related_name='decks', blank=True
+    )
+    words = models.ManyToManyField(
+        ChineseWord, related_name='lessons', blank=True
+    )
+    supplementary_words = models.ManyToManyField(
+        ChineseWord, related_name='supplementary_lessons', blank=True, through='LessonSupplementaryWord'
+    )
+    words_for_understanding = models.ManyToManyField(
+        ChineseWord, related_name='understanding_lessons', blank=True, through='LessonWordsForUnderstanding'
+    )
+    lesson_file = models.FileField(
+        upload_to='lessons_files/', blank=True, null=True, validators=[validate_pdf]
+    )
 
     def __str__(self):
         return self.title
+
+
+class LessonSupplementaryWord(models.Model):
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    chinese_word = models.ForeignKey(ChineseWord, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['lesson', 'chinese_word'],
+                name='lesson_supplementarywords_uniq'  # Устанавливаем кастомное имя индекса
+            ),
+        ]
+
+
+class LessonWordsForUnderstanding(models.Model):
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    chinese_word = models.ForeignKey(ChineseWord, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['lesson', 'chinese_word'],
+                name='lesson_wordsunderstanding_uniq'  # Устанавливаем кастомное имя индекса
+            ),
+        ]
 
 
 class LexicalExercise(models.Model):

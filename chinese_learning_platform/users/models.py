@@ -126,7 +126,23 @@ class DeckPerformance(models.Model):
     deck = models.ForeignKey(Deck, on_delete=models.CASCADE)
     percent_correct = models.IntegerField()
     test_date = models.DateTimeField(default=timezone.now)
-    wrong_answers = models.ManyToManyField(ChineseWord, related_name='deck_performances', blank=True)  # New field
-
+    wrong_answers = models.ManyToManyField(
+        ChineseWord,
+        related_name='deck_performances',
+        blank=True,
+        through='DeckPerformanceWrongAnswers'  # Указываем имя промежуточной таблицы
+    )
     def __str__(self):
         return f'Deck Performance: User {self.user.id}, Deck {self.deck.id}, Percent Correct {self.percent_correct}, Test Date {self.test_date}'
+
+class DeckPerformanceWrongAnswers(models.Model):
+    deck_performance = models.ForeignKey(DeckPerformance, on_delete=models.CASCADE)
+    chinese_word = models.ForeignKey(ChineseWord, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['deck_performance', 'chinese_word'],
+                name='deckperformance_wronganswers_uniq'
+            ),
+        ]

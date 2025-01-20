@@ -28,7 +28,8 @@ INTERNAL_IPS = [
 ]
 # DEBUG = False
 
-ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'chinese-on-djang-hahshkj2wkj.amvera.io', '127.0.0.1', 'new-chinese-hahshkj2wkj.amvera.io']
+ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'chinese-on-djang-hahshkj2wkj.amvera.io', '127.0.0.1',
+                 'new-chinese-hahshkj2wkj.amvera.io']
 CSRF_TRUSTED_ORIGINS = [
     'http://192.168.0.100',
     'http://localhost',
@@ -135,12 +136,10 @@ DATABASES = {
         'PORT': 5432,
         'OPTIONS': {
             'sslmode': 'require',
+            'max_identifier_length': 63,
         },
     }
 }
-
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
