@@ -11,6 +11,7 @@
         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li><a class="dropdown-item" href="{% url 'frontend:user_decks' user.username %}">Колоды</a></li>
             <li><a class="dropdown-item" href="{% url 'schedule:calendar' %}">Расписание</a></li>
+            <li><a class="dropdown-item" href="{% url 'lessons:lesson_list'%}">Уроки Китайского</a></li>
         </ul>
     </li>
     <li class="nav-item dropdown">
@@ -23,7 +24,6 @@
             <li><a class="dropdown-item" href="{% url 'frontend:user_words'%}">Изученные слова</a></li>
             <li><a class="dropdown-item" href="{% url 'frontend:all_words' %}">Слова</a></li>
             <li><a class="dropdown-item" href="{% url 'frontend:user_favorites'%}">Избранные слова</a></li>
-            <li><a class="dropdown-item" href="{% url 'lessons:lesson_list'%}">Уроки Китайского</a></li>
             <li><a class="dropdown-item" href="{% url 'mindmaps:mindmap-list' %}">МайндМапы</a></li>
         </ul>
     </li>

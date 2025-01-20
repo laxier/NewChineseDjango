@@ -160,6 +160,10 @@ class AllWordsView(WordPaginationMixin, CurrentUserMixin, ListView):
             )
         return queryset
 
+from django.db.models import F, FloatField, ExpressionWrapper, Value
+from django.db.models.functions import Coalesce
+from django.db.models import F, FloatField, ExpressionWrapper, Value, Case, When
+
 
 class WordFilteringMixin:
     def apply_review_period_filter(self, queryset):
@@ -196,19 +200,27 @@ class WordFilteringMixin:
         """Applies sorting based on query parameters."""
         sort_by = self.request.GET.get('sort_by', 'edited')
         sort_order = self.request.GET.get('sort_order', 'desc')
-        # Annotate the queryset with `accuracy_percentage`
+
+        # Annotate the queryset with `accuracy_percentage`, handling division by zero
         queryset = queryset.annotate(
             accuracy_percentage=ExpressionWrapper(
-                (F('right') * 100.0) / (F('right') + F('wrong')),
-                output_field=FloatField()
+                Case(
+                    When(right=0, then=Value(0.0)),  # Avoid division by zero
+                    When(wrong=0, then=Value(100.0)),  # Perfect accuracy
+                    default=(F('right') * 100.0) / (F('right') + F('wrong')),
+                ),
+                output_field=FloatField(),  # Ensure output is a FloatField
             )
         )
 
         if sort_by == 'accuracy_percentage':
-            return queryset.order_by(sort_order == 'asc' and 'accuracy_percentage' or '-accuracy_percentage')
+            return queryset.order_by(
+                'accuracy_percentage' if sort_order == 'asc' else '-accuracy_percentage'
+            )
 
-        return queryset.order_by(sort_order == 'asc' and sort_by or f'-{sort_by}')
-
+        return queryset.order_by(
+            sort_by if sort_order == 'asc' else f'-{sort_by}'
+        )
     def apply_search_filter(self, queryset):
         """Apply the search filter if a search query is provided."""
         search_query = self.request.GET.get('search')
