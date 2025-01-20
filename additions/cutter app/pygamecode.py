@@ -187,8 +187,10 @@ def main():
 if __name__ == "__main__":
     # Load audio file
     # markers = [13.21, 30.04, 42.66]
-    OUTPUT_PREFIX = "L34_"+"Text"
-    audio_file = "L34_1_Text.mp3"  # Replace with your audio file
+    # markers = [19.24, 51.09, 74.94, 102.50, 128.37]
+
+    OUTPUT_PREFIX = "L34_3"+"Lexical_exercises"+"2_part"
+    audio_file = "L34_3_Lexical_exercises.mp3"  # Replace with your audio file
     load_audio(audio_file)
 
     main()
