@@ -116,35 +116,35 @@ TEMPLATES = [
 WSGI_APPLICATION = 'chinese_learning_platform.wsgi.application'
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'chinese',  # Имя базы данных
-        'USER': 'postgres',  # Имя пользователя
-        'PASSWORD': 'rootroot',  # Пароль пользователя
-        'HOST': '127.0.0.1',  # Локальный хост или IP-адрес сервера
-        'PORT': 5432,  # Стандартный порт PostgreSQL
-        'OPTIONS': {
-            # 'sslmode': 'require',  # Для защищенного соединения
-        },
-    }
-}
-
-# from decouple import config
-#
 # DATABASES = {
 #     'default': {
-#         'ENGINE': config('DB_ENGINE'),
-#         'NAME': config('DB_NAME'),
-#         'USER': config('DB_USER'),
-#         'PASSWORD': config('DB_PASSWORD'),
-#         'HOST': config('DB_HOST'),
-#         'PORT': 5432,
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'chinese',  # Имя базы данных
+#         'USER': 'postgres',  # Имя пользователя
+#         'PASSWORD': 'rootroot',  # Пароль пользователя
+#         'HOST': '127.0.0.1',  # Локальный хост или IP-адрес сервера
+#         'PORT': 5432,  # Стандартный порт PostgreSQL
 #         'OPTIONS': {
-#             'sslmode': 'require',
+#             # 'sslmode': 'require',  # Для защищенного соединения
 #         },
 #     }
 # }
+
+from decouple import config
+
+DATABASES = {
+    'default': {
+        'ENGINE': config('DB_ENGINE'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': 5432,
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
