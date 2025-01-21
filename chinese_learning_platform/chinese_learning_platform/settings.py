@@ -116,33 +116,25 @@ TEMPLATES = [
 WSGI_APPLICATION = 'chinese_learning_platform.wsgi.application'
 
 #
+# from decouple import config
+#
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'chinese2',  # Имя базы данных
-#         'USER': 'postgres',  # Имя пользователя
-#         'PASSWORD': 'rootroot',  # Пароль пользователя
-#         'HOST': '127.0.0.1',  # Локальный хост или IP-адрес сервера
-#         'PORT': 5432,  # Стандартный порт PostgreSQL
+#         'ENGINE': config('DB_ENGINE'),
+#         'NAME': config('DB_NAME'),
+#         'USER': config('DB_USER'),
+#         'PASSWORD': config('DB_PASSWORD'),
+#         'HOST': config('DB_HOST'),
+#         'PORT': config('DB_PORT', default=5432, cast=int),
 #         'OPTIONS': {
-#             # 'sslmode': 'require',  # Для защищенного соединения
+#             'sslmode': config('DB_SSLMODE', default='require'),
 #         },
 #     }
 # }
-
-from decouple import config
-
 DATABASES = {
     'default': {
-        'ENGINE': config('DB_ENGINE'),
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', default=5432, cast=int),
-        'OPTIONS': {
-            'sslmode': config('DB_SSLMODE', default='require'),
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
