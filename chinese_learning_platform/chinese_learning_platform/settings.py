@@ -28,13 +28,11 @@ INTERNAL_IPS = [
 ]
 # DEBUG = False
 
-ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'chinese-on-djang-hahshkj2wkj.amvera.io', '127.0.0.1',
-                 'new-chinese-hahshkj2wkj.amvera.io']
+ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'amvera-hahshkj2wkj-run-chinesesite.io', '127.0.0.1',]
 CSRF_TRUSTED_ORIGINS = [
     'http://192.168.0.100',
     'http://localhost',
-    'https://chinese-on-djang-hahshkj2wkj.amvera.io',
-    'https://new-chinese-hahshkj2wkj.amvera.io'
+    'https://amvera-hahshkj2wkj-run-chinesesite.io',
 ]
 
 # Application definition
