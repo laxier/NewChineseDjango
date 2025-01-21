@@ -9,5 +9,4 @@ run:
   persistenceMount: /data
   containerPort: "80"
   command: >
-    cd chinese_learning_platform &&
-    gunicorn chinese_learning_platform.wsgi:application --bind 0.0.0.0:80
+    cd chinese_learning_platform && gunicorn chinese_learning_platform.wsgi:application --bind 0.0.0.0:80
