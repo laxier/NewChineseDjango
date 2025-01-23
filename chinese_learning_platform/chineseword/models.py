@@ -5,6 +5,8 @@ from django.db.models import UniqueConstraint
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+
 class ChineseWord(models.Model):
     simplified = models.CharField(max_length=50)
     traditional = models.CharField(max_length=50, blank=True, null=True)
@@ -19,6 +21,7 @@ class ChineseWord(models.Model):
     )
 
     class Meta:
+        db_table = 'chinese_word'
         constraints = [
             UniqueConstraint(fields=['simplified', 'pinyin', 'meaning'], name='unique_simplified_pinyin_meaning')
         ]
@@ -48,6 +51,7 @@ class ChineseWordFavorite(models.Model):
                 name='chineseword_favorites_uniq'  # Устанавливаем короткое имя
             ),
         ]
+
 
 def searchWord(word):
     url = f'https://www.trainchinese.com/v2/search.php?searchWord={word}&rAp=0&height=0&width=0&tcLanguage=ru'
@@ -84,4 +88,3 @@ def searchWord(word):
     except requests.exceptions.RequestException as e:
         print(f"Error fetching word details: {e}")
         return None, None
-
