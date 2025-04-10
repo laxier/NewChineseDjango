@@ -109,6 +109,7 @@ class HSK4ProgressDownloadView(LoginRequiredMixin, View):
             else:
                 cell.font = good_progress_font
 
+
         # ---------------------------------------------------
         # 5) Заполняем A,B,C для слова из E и I,J,K, для примера из L
         # ---------------------------------------------------
