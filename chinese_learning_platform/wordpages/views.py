@@ -22,7 +22,6 @@ class ChineseWordDetailView(CurrentUserMixin, generic.DetailView):
 
         return context
 
-
 import os
 import datetime
 
@@ -39,67 +38,69 @@ from chineseword.models import ChineseWord
 
 
 class HSK4ProgressDownloadView(LoginRequiredMixin, View):
-    """
-    Пример вью:
-    1) Загружаем progress_template_hsk4.xlsx
-    2) Собираем слова из столбца E и примеры из столбца M
-    3) Одним запросом получаем ChineseWord
-    4) Одним запросом получаем WordPerformance для текущего юзера
-    7) Сохраняем и отдаём пользователю Excel
-    """
-
     def get(self, request, *args, **kwargs):
-        # 1) Путь к шаблону
         input_path = os.path.join(settings.BASE_DIR, "progress_template_hsk4.xlsx")
         wb = openpyxl.load_workbook(input_path)
-        ws = wb.active  # Или wb["Sheet"] — смотрите, как у вас называется лист
+        ws = wb.active
 
-        # ---------------------------------------------------
-        # 2) Собираем иероглифы из столбцов E (слово) и M (пример)
-        # ---------------------------------------------------
+        # -----------------------------
+        # СЧЁТЧИКИ ДЛЯ СЛОВ
+        # -----------------------------
+        total_words = 0
+        none_count_words = 0
+        low_count_words = 0
+        medium_count_words = 0
+        high_count_words = 0
+
+        # -----------------------------
+        # СЧЁТЧИКИ ДЛЯ ПРИМЕРОВ
+        # -----------------------------
+        total_examples = 0
+        none_count_examples = 0
+        low_count_examples = 0
+        medium_count_examples = 0
+        high_count_examples = 0
+
+        # -----------------------------
+        # 1) Собираем иероглифы
+        # -----------------------------
         characters = set()
 
-        # Для слов: E = 5
+        # Для слов (столбец E=5 → index=4)
         for row in ws.iter_rows(min_row=2, max_col=15):
-            word_cell = row[4]  # index 4 = колонка E
+            word_cell = row[4]
             if word_cell.value:
                 characters.add(word_cell.value)
 
-        # Для примеров: L = 12
+        # Для примеров (столбец L=12 → index=11)
         for row in ws.iter_rows(min_row=2, max_col=15):
-            example_cell = row[11]  # index 11 = колонка L
+            example_cell = row[11]
             if example_cell.value:
                 characters.add(example_cell.value)
 
-        # ---------------------------------------------------
-        # 3) Одним запросом все ChineseWord, у которых simplified в нашем наборе
-        # ---------------------------------------------------
+        # -----------------------------
+        # 2) Загружаем слова из БД
+        # -----------------------------
         words_qs = ChineseWord.objects.filter(simplified__in=characters)
-        # Превращаем в словарь { "你": <ChineseWord>, "爱": <ChineseWord>, ... }
         word_dict = {w.simplified: w for w in words_qs}
 
-        # ---------------------------------------------------
-        # 4) Одним запросом все WordPerformance для этих слов
-        # ---------------------------------------------------
+        # -----------------------------
+        # 3) Загружаем перформансы
+        # -----------------------------
         user_id = request.user.id
-        word_ids = [w.id for w in words_qs]  # список ID найденных слов
+        word_ids = [w.id for w in words_qs]
         perf_qs = WordPerformance.objects.filter(user_id=user_id, word_id__in=word_ids)
-        # Словарь { word_id: <WordPerformance>, ... }
         perf_dict = {p.word_id: p for p in perf_qs}
 
-        # ---------------------------------------------------
-        # Пример несложной логики раскраски ячеек со словами/примерами
-        # ---------------------------------------------------
+        # -----------------------------
+        # 4) Стили и функция раскраски
+        # -----------------------------
         no_progress_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
-        no_progress_font = Font(color="000000")  # для слабого прогресса
-        low_progress_font = Font(color="FF9900")  # прогресс 30-80
-        good_progress_font = Font(color="008000")  # >80
+        no_progress_font = Font(color="000000")
+        low_progress_font = Font(color="FF9900")
+        good_progress_font = Font(color="008000")
 
         def color_cell_if_needed(cell, prog):
-            """
-            Раскрашивает ячейку (cell) в зависимости от прогресса prog.
-            prog может быть None, либо целым числом 0..100
-            """
             if prog is None:
                 cell.fill = no_progress_fill
             elif prog < 30:
@@ -109,28 +110,37 @@ class HSK4ProgressDownloadView(LoginRequiredMixin, View):
             else:
                 cell.font = good_progress_font
 
-        # ---------------------------------------------------
-        # 5) Заполняем A,B,C для слова из E и I,J,K, для примера из L
-        # ---------------------------------------------------
+        # -----------------------------
+        # 5) Проход по строкам и РЕАЛЬНЫЙ ПОДСЧЁТ СЛОВ
+        # -----------------------------
         for row in ws.iter_rows(min_row=2, max_col=15):
-            # Ячейки для слов (E=5 → index=4)
+            # СЛОВО в E (index=4)
             word_cell = row[4]
-            # Ячейки для примеров (L=13 → index=12)
-            example_cell = row[11]
-            print(example_cell.value)
-
-            # 5.1) Если есть "слово" в E (упрощённый иероглиф)
             if word_cell.value:
                 word_obj = word_dict.get(word_cell.value)
                 perf = perf_dict.get(word_obj.id) if word_obj else None
 
-                # Берём нужные поля
+                # Считаем
+                total_words += 1
+
+                if perf and perf.accuracy_percentage_display is not None:
+                    prog = perf.accuracy_percentage_display
+                else:
+                    prog = None
+
+                # Логика распределения по категориям
+                if prog is None:
+                    none_count_words += 1
+                elif prog < 30:
+                    low_count_words += 1
+                elif 30 <= prog <= 80:
+                    medium_count_words += 1
+                else:
+                    high_count_words += 1
+
+                # Запись в A,B,C
                 wrong_count = perf.wrong if perf else 0
                 right_count = perf.right if perf else 0
-                prog = perf.accuracy_percentage_display if (
-                            perf and perf.accuracy_percentage_display is not None) else None
-
-                # Записываем в A,B,C (index=0,1,2)
                 row_num = word_cell.row
                 a_cell = ws.cell(row=row_num, column=1)  # A
                 b_cell = ws.cell(row=row_num, column=2)  # B
@@ -140,40 +150,100 @@ class HSK4ProgressDownloadView(LoginRequiredMixin, View):
                 b_cell.value = right_count
                 c_cell.value = prog if prog is not None else ""
 
-                # Раскрасим саму ячейку со словом (E) по прогрессу
+                # Раскраска
                 color_cell_if_needed(word_cell, prog)
 
-            # 5.2) Если есть "пример" в L (упрощённый иероглиф)
+            # ПРИМЕР в L (index=11)
+            example_cell = row[11]
             if example_cell.value:
                 word_obj = word_dict.get(example_cell.value)
                 perf = perf_dict.get(word_obj.id) if word_obj else None
 
+                # Считаем
+                total_examples += 1
+
+                if perf and perf.accuracy_percentage_display is not None:
+                    prog = perf.accuracy_percentage_display
+                else:
+                    prog = None
+
+                # Логика распределения по категориям
+                if prog is None:
+                    none_count_examples += 1
+                elif prog < 30:
+                    low_count_examples += 1
+                elif 30 <= prog <= 80:
+                    medium_count_examples += 1
+                else:
+                    high_count_examples += 1
+
+                # Запись в I,J,K (зависит от того, куда хотите писать)
+                row_num = example_cell.row
+                i_cell = ws.cell(row=row_num, column=9)   # I
+                j_cell = ws.cell(row=row_num, column=10)  # J
+                k_cell = ws.cell(row=row_num, column=11)  # K
+
                 wrong_count = perf.wrong if perf else 0
                 right_count = perf.right if perf else 0
-                prog = perf.accuracy_percentage_display if (
-                            perf and perf.accuracy_percentage_display is not None) else None
 
-                # Записываем в J,K,L (index=9,10,11)
-                row_num = example_cell.row
-                j_cell = ws.cell(row=row_num, column=9)  # I
-                k_cell = ws.cell(row=row_num, column=10)  # J
-                l_cell = ws.cell(row=row_num, column=11)  # K
+                i_cell.value = wrong_count
+                j_cell.value = right_count
+                k_cell.value = prog if prog is not None else ""
 
-                j_cell.value = wrong_count
-                k_cell.value = right_count
-                l_cell.value = prog if prog is not None else ""
-
-                # Раскрасим саму ячейку с примером (M) по прогрессу
+                # Раскраска
                 color_cell_if_needed(example_cell, prog)
 
-        # ---------------------------------------------------
-        # 6) (Необязательно) создаём лист Statistics, если нужно
-        #    — можно собрать суммарную статистику и вывести
-        # ---------------------------------------------------
-        # (Пропущено для краткости — по аналогии с предыдущими примерами.)
+        # -------------------------------------------------------
+        # 6) Создаём лист Statistics и записываем результаты
+        # -------------------------------------------------------
+        current_dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if "Statistics" in wb.sheetnames:
+            stats_sheet = wb["Statistics"]
+            for row in stats_sheet["A1:F50"]:
+                for cell in row:
+                    cell.value = None
+        else:
+            stats_sheet = wb.create_sheet("Statistics")
+
+        stats_sheet["A1"] = "Дата и время"
+        stats_sheet["B1"] = current_dt
+
+        # Слова
+        stats_sheet["A2"] = "Слова"
+        stats_sheet["A3"] = "Всего слов"
+        stats_sheet["B3"] = total_words
+
+        stats_sheet["A4"] = "Без прогресса (None)"
+        stats_sheet["B4"] = none_count_words
+
+        stats_sheet["A5"] = "Прогресс 0-30"
+        stats_sheet["B5"] = low_count_words
+
+        stats_sheet["A6"] = "Прогресс 30-80"
+        stats_sheet["B6"] = medium_count_words
+
+        stats_sheet["A7"] = "Прогресс >80"
+        stats_sheet["B7"] = high_count_words
+
+        # Примеры
+        stats_sheet["A10"] = "Примеры"
+        stats_sheet["A11"] = "Всего примеров"
+        stats_sheet["B11"] = total_examples
+
+        stats_sheet["A12"] = "Без прогресса (None)"
+        stats_sheet["B12"] = none_count_examples
+
+        stats_sheet["A13"] = "Прогресс 0-30"
+        stats_sheet["B13"] = low_count_examples
+
+        stats_sheet["A14"] = "Прогресс 30-80"
+        stats_sheet["B14"] = medium_count_examples
+
+        stats_sheet["A15"] = "Прогресс >80"
+        stats_sheet["B15"] = high_count_examples
 
         # ---------------------------------------------------
-        # 7) Возвращаем Excel с датой и временем в названии
+        # 7) Сохраняем и отдаём файл
         # ---------------------------------------------------
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"hsk4_progress_{timestamp}.xlsx"
