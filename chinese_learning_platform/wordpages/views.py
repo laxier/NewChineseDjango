@@ -207,6 +207,8 @@ class HSK4ProgressDownloadView(LoginRequiredMixin, View):
 
         stats_sheet["A1"] = "Дата и время"
         stats_sheet["B1"] = current_dt
+        stats_sheet.column_dimensions['A'].width = 25
+        stats_sheet.column_dimensions['B'].width = 15
 
         # Слова
         stats_sheet["A2"] = "Слова"
