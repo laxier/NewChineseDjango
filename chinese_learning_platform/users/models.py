@@ -89,9 +89,13 @@ class WordPerformance(models.Model):
         if self.next_review_date.date() > timezone.now().date() and self.repetitions != 0:
             return
 
-        if (self.right <= 1 and self.repetitions >= 3) or (self.accuracy_percentage_display <= 30 and self.repetitions >= 5):
+        if self.right <= 1 and self.repetitions >= 3:
             self.repetitions = 1
             self.right += 1
+        elif self.accuracy_percentage_display <= 30 and self.repetitions >= 3:
+            self.repetitions = 1
+            self.right += 1
+            self.wrong = 2
         else:
             self.repetitions += 1
             self.right += 1
