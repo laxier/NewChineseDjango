@@ -287,20 +287,18 @@ class ReviewWordsView(CurrentUserMixin, WordFilteringMixin, ListView):
         return context
 
     def filter_due_words(self, queryset):
-        """Filter words that are due for review based on next_review_date."""
-        now = timezone.now()
-        # Filter the queryset directly
-        due_words = queryset.filter(next_review_date__lte=now)
+        """Filter words that are due for review based on next_review_date (only by date)."""
+        today = timezone.now().date()
+        # Filter the queryset comparing only dates
+        due_words = queryset.filter(next_review_date__date__lte=today)
 
-        # Returning a list of dictionaries containing word and performance
         return [
             {
-                'word': performance.word,  # Use the related `word`
+                'word': performance.word,
                 'performance': performance
             }
             for performance in due_words
         ]
-
 
 def translate_to_russian(review_period=None, hsk_levels=None):
     """Transform review period and HSK levels to Russian verbose names."""
