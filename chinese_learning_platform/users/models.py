@@ -92,7 +92,7 @@ class WordPerformance(models.Model):
         if self.right <= 1 and self.repetitions >= 3:
             self.repetitions = 1
             self.right += 1
-        elif self.accuracy_percentage_display <= 30 and self.repetitions >= 3:
+        elif self.accuracy_percentage_display <= 30 and self.repetitions >= 7:
             self.repetitions = 1
             self.right += 1
             self.wrong = 2
