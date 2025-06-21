@@ -7,7 +7,9 @@ build:
   requirementsPath: requirements.txt
 run:
   scriptName: ""
-  command: cd chinese_learning_platform && /app/venv/bin/python3 -m gunicorn
-    chinese_learning_platform.wsgi:application --bind 0.0.0.0:80
+  command: >
+    cd chinese_learning_platform &&
+    /app/venv/bin/python3 -m gunicorn chinese_learning_platform.wsgi:application --bind 0.0.0.0:80
+
   persistenceMount: /data
   containerPort: "80"
