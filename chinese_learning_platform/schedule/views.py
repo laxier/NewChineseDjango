@@ -84,12 +84,22 @@ class LessonCreateView(CreateView):
         return super().form_valid(form)
 
 
+from django.utils import timezone
+from datetime import date
+
+
 # Редактирование урока
 class LessonUpdateView(UpdateView):
     model = Lesson
     form_class = LessonForm
     template_name = "schedule/lesson_form.html"
     success_url = reverse_lazy('schedule:calendar')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['today'] = date.today().isoformat()
+        context['model_name'] = 'Lesson'  # Ensure model_name is provided
+        return context
 
 
 # views.py
@@ -153,7 +163,7 @@ def form_valid(self, form):
 
 class HomeworkUpdateView(UpdateView):
     model = Homework
-    fields = ['user', 'lesson', 'title', 'assigned_date', 'due_date', 'is_completed', 'grade']
+    fields = ['lesson', 'title', 'assigned_date', 'due_date', 'is_completed', 'grade']
     template_name = "schedule/homework_form.html"
     success_url = reverse_lazy('schedule:calendar')
 

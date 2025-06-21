@@ -7,7 +7,7 @@ class LessonForm(forms.ModelForm):
         model = Lesson
         fields = ['user', 'number', 'title', 'description', 'date']
         widgets = {
-            'birthday': forms.DateInput(attrs={'type': 'date'})
+            'date': forms.DateTimeInput(attrs={'class': 'form-control', 'id': 'id_date'}, format='%Y-%m-%d %H:%M:%S'),
         }
 
     date = forms.DateTimeField(initial=now)
