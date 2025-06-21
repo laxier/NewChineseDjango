@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=pgv_mp-c3@v9*nxbns34*fc-c_^vrgmx@xmno@&sq4rulxz2q
 # DEBUG = True
 INTERNAL_IPS = [
     "127.0.0.1",
-] 
+]
 DEBUG = False
 
 ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'amvera-hahshkj2wkj-run-chinesesite.io', '127.0.0.1', 'chinesesite-hahshkj2wkj.amvera.io']
