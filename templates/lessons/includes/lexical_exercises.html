@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lexical Exercises</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .child-exercise, .exercise-container {
             flex-direction: row;
@@ -19,8 +19,21 @@
 
         .audio-container {
             font-size: 14px;
-            width: 40%;
+            width: 45%;
             margin: 20px 0;
+        }
+
+        .audio-content {
+            border: 1px solid rgb(0, 0, 0); /* Single border around audio player and text */
+            padding: 10px;
+            border-radius: 0px;
+        }
+
+        .audio-text {
+            font-size: 26px; /* Match chinese-dialogue */
+            margin-top: 10px;
+            text-align: left;
+            font-family: KaiTi, 'Adobe Kaiti Std', SimSun, MingLiU, PMingLiU, Arial, sans-serif; /* Match chinese-dialogue */
         }
 
         .navigation-controls {
@@ -30,19 +43,19 @@
         }
 
         .chinese-dialogue {
-            text-align: justify;
+            text-align: left;
             font-size: 26px;
             border-radius: 8px;
             margin: 20px 0;
             padding: 0;
-            font-family: KaiTi, 'Adobe Kaiti Std', SimSun, MingLiU, PMingLiU, Arial, 'Times New Roman', serif;
+            font-family: KaiTi, 'Adobe Kaiti Std', SimSun, MingLiU, PMingLiU, Arial, sans-serif;
         }
     </style>
 </head>
 <body>
 <div id="lexical-exercises-container"></div>
-<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <script type="text/babel">
@@ -71,7 +84,6 @@
                 mainAudioRef.current.currentTime = 0;
                 mainAudioRef.current.load();
             }
-
             childAudioRefs.current.forEach(ref => {
                 if (ref) {
                     ref.pause();
@@ -84,12 +96,65 @@
         const currentExercise = exercises[currentIndex];
 
         const formatTextWithLineBreaks = (text) => {
-            return text.split(/\r?\n/).map((part, index) => (
-                <span key={index}>
-                        {part}
-                    <br/>
+            console.log('Input text:', text); // Debug: log raw input
+
+            // Split text at double newline (\r\n\r\n or \n\n)
+            const separator = /\r\n\r\n|\n\n/;
+            const parts = text.split(separator);
+            let mainTextLines = parts[0] ? parts[0].split(/\r?\n/) : [];
+            let audioTextLines = parts[1] ? parts[1].split(/\r?\n/) : [];
+
+            // Remove trailing empty lines from both parts
+            mainTextLines = mainTextLines.filter(line => line.trim() !== '');
+            audioTextLines = audioTextLines.filter(line => line.trim() !== '');
+
+            console.log('Main text lines:', mainTextLines); // Debug
+            console.log('Audio text lines:', audioTextLines); // Debug
+
+            // Process lines for <b> and <u> tags
+            const processLine = (line, lineIndex) => {
+                const parts = [];
+                let currentText = line;
+                let partIndex = 0;
+
+                // Regex to match <b> and <u> tags
+                const regex = /(<b>.*?<\/b>|<u>.*?<\/u>)/g;
+                const matches = line.match(regex) || [];
+                let lastIndex = 0;
+
+                line.replace(regex, (match, _, index) => {
+                    if (index > lastIndex) {
+                        parts.push(<span key={`${lineIndex}-${partIndex++}`}>{currentText.slice(lastIndex, index)}</span>);
+                    }
+                    if (match.startsWith('<b>')) {
+                        const content = match.slice(3, -4);
+                        parts.push(<strong key={`${lineIndex}-${partIndex++}`}>{content}</strong>);
+                    } else if (match.startsWith('<u>')) {
+                        const content = match.slice(3, -4);
+                        parts.push(<u key={`${lineIndex}-${partIndex++}`}>{content}</u>);
+                    }
+                    lastIndex = index + match.length;
+                });
+
+                if (lastIndex < currentText.length) {
+                    parts.push(<span key={`${lineIndex}-${partIndex++}`}>{currentText.slice(lastIndex)}</span>);
+                }
+
+                return (
+                    <span key={lineIndex}>
+                        {parts.length > 0 ? parts : line}
+                        <br/>
                     </span>
-            ));
+                );
+            };
+
+            const mainText = mainTextLines.map((line, index) => processLine(line, index));
+            const audioText = audioTextLines.map((line, index) => processLine(line, index + mainTextLines.length));
+
+            console.log('Main text rendered:', mainText); // Debug
+            console.log('Audio text rendered:', audioText); // Debug
+
+            return { mainText, audioText };
         };
 
         return (
@@ -97,21 +162,24 @@
                 <h2 className="title">Lexical Exercises</h2>
 
                 <div className="navigation-controls">
-                    <button className="btn btn-secondary" disabled={currentIndex === 0} onClick={handlePrevious}>←
-                        Previous
-                    </button>
-                    <button className="btn btn-secondary" disabled={currentIndex === exercises.length - 1}
-                            onClick={handleNext}>Next →
-                    </button>
+                    <button className="btn btn-secondary" disabled={currentIndex === 0} onClick={handlePrevious}>← Previous</button>
+                    <button className="btn btn-secondary" disabled={currentIndex === exercises.length - 1} onClick={handleNext}>Next →</button>
                 </div>
 
                 <div className="exercise-container">
-                    <p className="chinese-dialogue">{formatTextWithLineBreaks(currentExercise.text)}</p>
+                    <p className="chinese-dialogue">{formatTextWithLineBreaks(currentExercise.text).mainText}</p>
                     <div className="audio-container">
-                        <audio className="audio-player" controls ref={mainAudioRef}>
-                            <source src={currentExercise.audio_file} type="audio/mpeg"/>
-                            Your browser does not support the audio element.
-                        </audio>
+                        <div className="audio-content">
+                            <audio className="audio-player" controls ref={mainAudioRef}>
+                                <source src={currentExercise.audio_file} type="audio/mpeg"/>
+                                Your browser does not support the audio element.
+                            </audio>
+                            {formatTextWithLineBreaks(currentExercise.text).audioText.length > 0 && (
+                                <div className="audio-text">
+                                    {formatTextWithLineBreaks(currentExercise.text).audioText}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -119,13 +187,19 @@
                     <div className="child-exercises-container">
                         {currentExercise.children.map((child, index) => (
                             <div key={child.id} className="child-exercise">
-                                <p className="chinese-dialogue">{formatTextWithLineBreaks(child.text)}</p>
+                                <p className="chinese-dialogue">{formatTextWithLineBreaks(child.text).mainText}</p>
                                 <div className="audio-container">
-                                    <audio className="audio-player" controls
-                                           ref={el => childAudioRefs.current[index] = el}>
-                                        <source src={child.audio_file} type="audio/mpeg"/>
-                                        Your browser does not support the audio element.
-                                    </audio>
+                                    <div className="audio-content">
+                                        <audio className="audio-player" controls ref={el => childAudioRefs.current[index] = el}>
+                                            <source src={child.audio_file} type="audio/mpeg"/>
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                        {formatTextWithLineBreaks(child.text).audioText.length > 0 && (
+                                            <div className="audio-text">
+                                                {formatTextWithLineBreaks(child.text).audioText}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}
