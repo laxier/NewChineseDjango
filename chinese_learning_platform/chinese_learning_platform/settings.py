@@ -28,12 +28,13 @@ INTERNAL_IPS = [
 ]
 DEBUG = False
 
-ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'amvera-hahshkj2wkj-run-chinesesite.io', '127.0.0.1', 'chinesesite-hahshkj2wkj.amvera.io']
+ALLOWED_HOSTS = ['192.168.0.100', 'localhost', 'chinesesite3-hahshkj2wkj.amvera.io', '127.0.0.1',
+                 'chinesesite-hahshkj2wkj.amvera.io']
 CSRF_TRUSTED_ORIGINS = [
     'http://192.168.0.100',
     'http://localhost',
-    'https://amvera-hahshkj2wkj-run-chinesesite.io',
-    'https://chinesesite-hahshkj2wkj.amvera.io'
+    'https://chinesesite3-hahshkj2wkj.amvera.io',
+    'https://chinesesite-hahshkj2wkj.amvera.io',
 ]
 
 # Application definition
@@ -136,7 +137,6 @@ DATABASES = {
         'NAME': (BASE_DIR.parent / 'data' / 'db.sqlite3').resolve(),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
