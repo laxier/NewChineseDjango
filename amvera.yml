@@ -13,22 +13,3 @@ run:
 
   persistenceMount: /data
   containerPort: "80"
-services:
-  web:
-    build: .
-    volumes:
-      - ./data/static:/data/static
-      - ./data/media:/data/media
-    expose:
-      - 8000
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./data/static:/data/static
-      - ./data/media:/data/media
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - web
